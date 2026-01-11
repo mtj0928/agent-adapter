@@ -1,34 +1,50 @@
 /// Supported tools for CASpec generation.
-public enum Tool: String, CaseIterable, Sendable {
+public struct Tool: Hashable, Sendable {
+    /// Tool name used for CASPEC block filtering (e.g. "codex").
+    public let name: String
+
+    /// Output spec file name (e.g. "AGENTS.md").
+    public let outputFileName: String
+
+    /// Destination folder for expanded skills.
+    public let skillsFolderName: String?
+
+    /// Destination folder for expanded subagents.
+    public let subagentsFolderName: String?
+
+    public init(
+        name: String,
+        outputFileName: String,
+        skillsFolderName: String?,
+        subagentsFolderName: String?
+    ) {
+        self.name = name
+        self.outputFileName = outputFileName
+        self.skillsFolderName = skillsFolderName
+        self.subagentsFolderName = subagentsFolderName
+    }
+}
+
+public extension Tool {
     /// Codex tool output (`AGENTS.md` and `.codex/`).
-    case codex
+    static let codex = Tool(
+        name: "codex",
+        outputFileName: "AGENTS.md",
+        skillsFolderName: ".codex/skills",
+        subagentsFolderName: nil
+    )
+
     /// Claude Code output (`CLAUDE.md` and `.claude/`).
-    case claude
+    static let claude = Tool(
+        name: "claude",
+        outputFileName: "CLAUDE.md",
+        skillsFolderName: ".claude/skills",
+        subagentsFolderName: ".claude/subagents"
+    )
 }
 
 extension Tool {
-    var outputFileName: String {
-        switch self {
-        case .codex: "AGENTS.md"
-        case .claude: "CLAUDE.md"
-        }
-    }
-
-    var skillsFolderName: String? {
-        switch self {
-        case .codex: ".codex/skills"
-        case .claude: ".claude/skills"
-        }
-    }
-
-    var subagentsFolderName: String? {
-        switch self {
-        case .codex: nil
-        case .claude: ".claude/subagents"
-        }
-    }
-
     var caspecBlockStart: String {
-        "<!-- CASPEC:\(rawValue) -->"
+        "<!-- CASPEC:\(name) -->"
     }
 }

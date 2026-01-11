@@ -91,7 +91,7 @@ private extension CASpecGenerator {
     func filterContents(_ contents: String, tool: Tool) -> String {
         enum BlockState {
             case all
-            case toolSpecific(Tool)
+            case toolSpecific(String)
         }
 
         var state = BlockState.all
@@ -113,21 +113,25 @@ private extension CASpecGenerator {
             switch state {
             case .all:
                 output.append(line)
-            case .toolSpecific(let blockTool):
-                if blockTool == tool {
-                    output.append(line)
-                }
+            case .toolSpecific(let blockToolName) where blockToolName == tool.name:
+                output.append(line)
+            case .toolSpecific:
+                break
             }
         }
 
         return output.joined(separator: "\n")
     }
 
-    func parseBlockStart(line: String) -> Tool? {
+    func parseBlockStart(line: String) -> String? {
         let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-        return Tool.allCases.first { tool in
-            trimmed == tool.caspecBlockStart
-        }
+        let prefix = "<!-- CASPEC:"
+        let suffix = " -->"
+        guard trimmed.hasPrefix(prefix), trimmed.hasSuffix(suffix) else { return nil }
+        let nameStart = trimmed.index(trimmed.startIndex, offsetBy: prefix.count)
+        let nameEnd = trimmed.index(trimmed.endIndex, offsetBy: -suffix.count)
+        let name = String(trimmed[nameStart..<nameEnd]).trimmingCharacters(in: .whitespacesAndNewlines)
+        return name.isEmpty ? nil : name
     }
 
     func isBlockEnd(line: String) -> Bool {
