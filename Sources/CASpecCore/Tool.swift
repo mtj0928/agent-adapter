@@ -45,6 +45,6 @@ public extension Tool {
 
 extension Tool {
     var caspecBlockStart: String {
-        "<!-- CASPEC:\(name) -->"
+        CASPECFormat.blockStart(toolName: name)
     }
 }

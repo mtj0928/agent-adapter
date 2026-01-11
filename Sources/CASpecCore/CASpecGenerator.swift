@@ -100,12 +100,12 @@ private extension CASpecGenerator {
 
         for lineSubsequence in lines {
             let line = String(lineSubsequence)
-            if let startTool = parseBlockStart(line: line) {
+            if let startTool = CASPECFormat.parseBlockStart(line: line) {
                 state = .toolSpecific(startTool)
                 continue
             }
 
-            if isBlockEnd(line: line) {
+            if CASPECFormat.isBlockEnd(line: line) {
                 state = .all
                 continue
             }
@@ -121,21 +121,5 @@ private extension CASpecGenerator {
         }
 
         return output.joined(separator: "\n")
-    }
-
-    func parseBlockStart(line: String) -> String? {
-        let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-        let prefix = "<!-- CASPEC:"
-        let suffix = " -->"
-        guard trimmed.hasPrefix(prefix), trimmed.hasSuffix(suffix) else { return nil }
-        let nameStart = trimmed.index(trimmed.startIndex, offsetBy: prefix.count)
-        let nameEnd = trimmed.index(trimmed.endIndex, offsetBy: -suffix.count)
-        let name = String(trimmed[nameStart..<nameEnd]).trimmingCharacters(in: .whitespacesAndNewlines)
-        return name.isEmpty ? nil : name
-    }
-
-    func isBlockEnd(line: String) -> Bool {
-        let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed == "<!-- CASPEC -->"
     }
 }
