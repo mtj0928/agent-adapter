@@ -3,9 +3,11 @@ import Testing
 @testable import CASpecCore
 
 struct CASpecGeneratorTests {
-    @Test(.temporaryDirectory) func generatesCodexOutputs() async throws {
-        let rootPath = try temporaryRootPath()
-        try writeFile(
+    @Test func generatesCodexOutputs() throws {
+        let rootPath = URL(fileURLWithPath: "/root")
+        let fileSystem = InMemoryFileSystem()
+        try fileSystem.createDirectory(at: rootPath, withIntermediateDirectories: true)
+        try fileSystem.writeFile(
             path: rootPath.appendingPathComponent("CASPEC.md"),
             contents: """
             # Title
@@ -22,7 +24,7 @@ struct CASpecGeneratorTests {
             """
         )
 
-        try writeFile(
+        try fileSystem.writeFile(
             path: rootPath.appendingPathComponent(".caspec/skills/test/SKILL.md"),
             contents: """
             Skill Shared
@@ -35,33 +37,35 @@ struct CASpecGeneratorTests {
             """
         )
 
-        let generator = CASpecGenerator()
+        let generator = CASpecGenerator(fileSystem: fileSystem)
         try generator.generate(in: rootPath, tool: .codex)
 
-        let agents = try String(
-            contentsOf: rootPath.appendingPathComponent("AGENTS.md"),
+        let agents = try fileSystem.readString(
+            at: rootPath.appendingPathComponent("AGENTS.md"),
             encoding: .utf8
         )
         #expect(agents.contains("Shared"))
         #expect(agents.contains("Codex Only"))
         #expect(!agents.contains("Claude Only"))
 
-        let skill = try String(
-            contentsOf: rootPath.appendingPathComponent(".codex/skills/test/SKILL.md"),
+        let skill = try fileSystem.readString(
+            at: rootPath.appendingPathComponent(".codex/skills/test/SKILL.md"),
             encoding: .utf8
         )
         #expect(skill.contains("Skill Shared"))
         #expect(skill.contains("Skill Codex"))
         #expect(!skill.contains("Skill Claude"))
 
-        #expect(!FileManager.default.fileExists(
+        #expect(!fileSystem.fileExists(
             atPath: rootPath.appendingPathComponent(".claude").path
         ))
     }
 
-    @Test(.temporaryDirectory) func generatesClaudeOutputs() async throws {
-        let rootPath = try temporaryRootPath()
-        try writeFile(
+    @Test func generatesClaudeOutputs() throws {
+        let rootPath = URL(fileURLWithPath: "/root")
+        let fileSystem = InMemoryFileSystem()
+        try fileSystem.createDirectory(at: rootPath, withIntermediateDirectories: true)
+        try fileSystem.writeFile(
             path: rootPath.appendingPathComponent("CASPEC.md"),
             contents: """
             Shared
@@ -74,39 +78,41 @@ struct CASpecGeneratorTests {
             """
         )
 
-        try writeFile(
+        try fileSystem.writeFile(
             path: rootPath.appendingPathComponent(".caspec/skills/test/SKILL.md"),
             contents: "Skill Shared"
         )
-        try writeFile(
+        try fileSystem.writeFile(
             path: rootPath.appendingPathComponent(".caspec/subagents/reviewer/AGENT.md"),
             contents: "Agent Shared"
         )
 
-        let generator = CASpecGenerator()
+        let generator = CASpecGenerator(fileSystem: fileSystem)
         try generator.generate(in: rootPath, tool: .claude)
 
-        let claude = try String(
-            contentsOf: rootPath.appendingPathComponent("CLAUDE.md"),
+        let claude = try fileSystem.readString(
+            at: rootPath.appendingPathComponent("CLAUDE.md"),
             encoding: .utf8
         )
         #expect(claude.contains("Shared"))
         #expect(claude.contains("Claude Only"))
         #expect(!claude.contains("Codex Only"))
 
-        #expect(FileManager.default.fileExists(
+        #expect(fileSystem.fileExists(
             atPath: rootPath.appendingPathComponent(".claude/skills/test/SKILL.md").path
         ))
-        #expect(FileManager.default.fileExists(
+        #expect(fileSystem.fileExists(
             atPath: rootPath.appendingPathComponent(".claude/subagents/reviewer/AGENT.md").path
         ))
     }
 }
 
-private func writeFile(path: URL, contents: String) throws {
-    try FileManager.default.createDirectory(
-        at: path.deletingLastPathComponent(),
-        withIntermediateDirectories: true
-    )
-    try contents.write(to: path, atomically: true, encoding: .utf8)
+fileprivate extension FileSystem {
+    func writeFile(path: URL, contents: String) throws {
+        try createDirectory(
+            at: path.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try writeString(contents, to: path, atomically: true, encoding: .utf8)
+    }
 }

@@ -3,8 +3,8 @@ import Testing
 @testable import CASpecCore
 
 struct CASpecDirectoryTests {
-    @Test(.temporaryDirectory) func buildsSourcePaths() async throws {
-        let rootPath = try temporaryRootPath()
+    @Test func buildsSourcePaths() {
+        let rootPath = URL(fileURLWithPath: "/root")
         let directory = CASpecDirectory(rootPath: rootPath)
 
         #expect(directory.specFilePath == rootPath.appendingPathComponent("CASPEC.md"))
@@ -13,8 +13,8 @@ struct CASpecDirectoryTests {
         #expect(directory.caspecSubagentsPath == rootPath.appendingPathComponent(".caspec/subagents"))
     }
 
-    @Test(.temporaryDirectory) func buildsToolOutputPaths() async throws {
-        let rootPath = try temporaryRootPath()
+    @Test func buildsToolOutputPaths() {
+        let rootPath = URL(fileURLWithPath: "/root")
         let directory = CASpecDirectory(rootPath: rootPath)
 
         let codexOutputs = directory.outputs(for: .codex)

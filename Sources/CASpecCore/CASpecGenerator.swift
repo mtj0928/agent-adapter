@@ -2,12 +2,12 @@ import Foundation
 
 /// Generates tool-specific documentation and configuration files from `CASPEC.md`.
 public struct CASpecGenerator {
-    private let fileManager: FileManager
+    private let fileSystem: FileSystem
 
-    /// Creates a generator with the provided file manager.
-    /// - Parameter fileManager: The file manager used for filesystem operations.
-    public init(fileManager: FileManager = .default) {
-        self.fileManager = fileManager
+    /// Creates a generator with the provided file system.
+    /// - Parameter fileSystem: The file system used for filesystem operations.
+    public init(fileSystem: FileSystem = FileManager.default) {
+        self.fileSystem = fileSystem
     }
 
     /// Generates tool-specific outputs in the given project root.
@@ -17,7 +17,7 @@ public struct CASpecGenerator {
     public func generate(in rootPath: URL, tool: Tool) throws {
         let directory = CASpecDirectory(rootPath: rootPath)
         let outputs = directory.outputs(for: tool)
-        let specContents = try String(contentsOf: directory.specFilePath, encoding: .utf8)
+        let specContents = try fileSystem.readString(at: directory.specFilePath, encoding: .utf8)
         let filteredSpec = filterContents(specContents, tool: tool)
         try writeSpecOutput(filteredSpec, to: outputs)
 
@@ -28,7 +28,7 @@ public struct CASpecGenerator {
 
 private extension CASpecGenerator {
     func writeSpecOutput(_ contents: String, to outputs: CASpecDirectory.ToolOutputs) throws {
-        try contents.write(to: outputs.specFilePath, atomically: true, encoding: .utf8)
+        try fileSystem.writeString(contents, to: outputs.specFilePath, atomically: true, encoding: .utf8)
     }
 
     func generateSkills(
@@ -37,7 +37,7 @@ private extension CASpecGenerator {
         tool: Tool
     ) throws {
         let sourcePath = directory.caspecSkillsPath
-        guard fileManager.fileExists(atPath: sourcePath.path),
+        guard fileSystem.fileExists(atPath: sourcePath.path),
               let destinationPath = outputs.skillsPath else { return }
         try copyDirectoryContents(from: sourcePath, to: destinationPath, tool: tool)
     }
@@ -48,26 +48,21 @@ private extension CASpecGenerator {
         tool: Tool
     ) throws {
         let sourcePath = directory.caspecSubagentsPath
-        guard fileManager.fileExists(atPath: sourcePath.path),
+        guard fileSystem.fileExists(atPath: sourcePath.path),
               let destinationPath = outputs.subagentsPath else { return }
         try copyDirectoryContents(from: sourcePath, to: destinationPath, tool: tool)
     }
 
     func copyDirectoryContents(from sourcePath: URL, to destinationPath: URL, tool: Tool) throws {
-        if !fileManager.fileExists(atPath: destinationPath.path) {
-            try fileManager.createDirectory(at: destinationPath, withIntermediateDirectories: true)
+        if !fileSystem.fileExists(atPath: destinationPath.path) {
+            try fileSystem.createDirectory(at: destinationPath, withIntermediateDirectories: true)
         }
 
-        let items = try fileManager.contentsOfDirectory(
-            at: sourcePath,
-            includingPropertiesForKeys: [.isDirectoryKey],
-            options: []
-        )
+        let items = try fileSystem.contentsOfDirectory(at: sourcePath)
         for itemPath in items {
-            let resourceValues = try itemPath.resourceValues(forKeys: [.isDirectoryKey])
             let destinationItemPath = destinationPath.appendingPathComponent(itemPath.lastPathComponent)
 
-            if resourceValues.isDirectory ?? false {
+            if try fileSystem.isDirectory(at: itemPath) {
                 try copyDirectoryContents(from: itemPath, to: destinationItemPath, tool: tool)
             } else {
                 try writeFilteredFile(from: itemPath, to: destinationItemPath, tool: tool)
@@ -76,22 +71,22 @@ private extension CASpecGenerator {
     }
 
     func writeFilteredFile(from sourcePath: URL, to destinationPath: URL, tool: Tool) throws {
-        try fileManager.createDirectory(
+        try fileSystem.createDirectory(
             at: destinationPath.deletingLastPathComponent(),
             withIntermediateDirectories: true
         )
 
-        if let data = try? Data(contentsOf: sourcePath),
+        if let data = try? fileSystem.readData(at: sourcePath),
            let text = String(data: data, encoding: .utf8) {
             let filtered = filterContents(text, tool: tool)
-            try filtered.write(to: destinationPath, atomically: true, encoding: .utf8)
+            try fileSystem.writeString(filtered, to: destinationPath, atomically: true, encoding: .utf8)
             return
         }
 
-        if fileManager.fileExists(atPath: destinationPath.path) {
-            try fileManager.removeItem(at: destinationPath)
+        if fileSystem.fileExists(atPath: destinationPath.path) {
+            try fileSystem.removeItem(at: destinationPath)
         }
-        try fileManager.copyItem(at: sourcePath, to: destinationPath)
+        try fileSystem.copyItem(at: sourcePath, to: destinationPath)
     }
 
     func filterContents(_ contents: String, tool: Tool) -> String {
