@@ -13,10 +13,10 @@ struct CASpecConfigurationTests {
               - name: codex
                 instructionsFile: CUSTOM.md
                 skillsDirectory: .custom/skills
-              - name: cortex
-                instructionsFile: CORTEX.md
-                skillsDirectory: .cortex/skills
-                subagentsDirectory: .cortex/subagents
+              - name: custom_agent
+                instructionsFile: CUSTOM_AGENT.md
+                skillsDirectory: .custom_agent/skills
+                subagentsDirectory: .custom_agent/subagents
             """,
             to: rootPath.appendingPathComponent(".caspec.yml"),
             atomically: true,
@@ -32,8 +32,8 @@ struct CASpecConfigurationTests {
         #expect(codex.skillsDirectory == ".custom/skills")
         #expect(codex.subagentsDirectory == nil)
 
-        let cortex = try #require(resolved["cortex"])
-        #expect(cortex.instructionsFile == "CORTEX.md")
-        #expect(cortex.subagentsDirectory == ".cortex/subagents")
+        let customAgent = try #require(resolved["custom_agent"])
+        #expect(customAgent.instructionsFile == "CUSTOM_AGENT.md")
+        #expect(customAgent.subagentsDirectory == ".custom_agent/subagents")
     }
 }

@@ -25,7 +25,7 @@ caspec codex
 caspec claude
 
 # Generate a custom tool from .caspec.yml
-caspec cortex
+caspec custom_agent
 ```
 
 ### CASPEC.md Syntax
@@ -55,10 +55,10 @@ tools:
   - name: codex
     instructionsFile: CUSTOM.md
     skillsDirectory: .custom/skills
-  - name: cortex
-    instructionsFile: CORTEX.md
-    skillsDirectory: .cortex/skills
-    subagentsDirectory: .cortex/subagents
+  - name: custom_agent
+    instructionsFile: CUSTOM_AGENT.md
+    skillsDirectory: .custom_agent/skills
+    subagentsDirectory: .custom_agent/subagents
 ```
 
 Fields:
