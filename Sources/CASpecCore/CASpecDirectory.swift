@@ -31,9 +31,9 @@ public struct CASpecDirectory: Sendable {
         caspecRootPath.appendingPathComponent("skills")
     }
 
-    /// The path to the `.caspec/subagents` source directory.
-    public var caspecSubagentsPath: URL {
-        caspecRootPath.appendingPathComponent("subagents")
+    /// The path to the `.caspec/agents` source directory.
+    public var caspecAgentsPath: URL {
+        caspecRootPath.appendingPathComponent("agents")
     }
 
     /// Returns tool-specific output paths derived from the project root.
@@ -62,9 +62,9 @@ extension CASpecDirectory {
             tool.skillsDirectory.map { rootPath.appendingPathComponent($0) }
         }
 
-        /// The output path for generated subagents, if applicable.
-        public var subagentsPath: URL? {
-            tool.subagentsDirectory.map { rootPath.appendingPathComponent($0) }
+        /// The output path for generated agents, if applicable.
+        public var agentsPath: URL? {
+            tool.agentsDirectory.map { rootPath.appendingPathComponent($0) }
         }
     }
 }

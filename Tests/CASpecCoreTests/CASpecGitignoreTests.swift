@@ -7,7 +7,7 @@ struct CASpecGitignoreTests {
             name: "custom",
             instructionsFile: "CUSTOM.md",
             skillsDirectory: ".custom/skills",
-            subagentsDirectory: ".custom/subagents"
+            agentsDirectory: ".custom/agents"
         )
 
         let output = CASpecGitignore.render(for: [custom, .claude])
@@ -16,12 +16,12 @@ struct CASpecGitignoreTests {
         # custom
         CUSTOM.md
         .custom/skills/
-        .custom/subagents/
+        .custom/agents/
 
         # claude
         CLAUDE.md
         .claude/skills/
-        .claude/subagents/
+        .claude/agents/
         """)
     }
 
@@ -31,7 +31,7 @@ struct CASpecGitignoreTests {
                 name: "custom",
                 instructionsFile: "CUSTOM.md",
                 skillsDirectory: ".custom/skills",
-                subagentsDirectory: nil
+                agentsDirectory: nil
             )
         ])
 

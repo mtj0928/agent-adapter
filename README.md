@@ -21,7 +21,7 @@ caspec currently supports Codex and Claude Code. You can also define custom tool
 
 ## How It Works
 - **Copy from a single source**: `CASPEC.md` is the canonical document. caspec reads it and generates tool-specific files such as `AGENTS.md` and `CLAUDE.md`.
-- **Skills and subagents**: Place reusable skills and (for Claude) subagents in `.caspec/`. They are expanded into `.codex/` and `.claude/` as needed, preserving directory structure.
+- **Skills and agents**: Place reusable skills and (for Claude) agents in `.caspec/`. They are expanded into `.codex/` and `.claude/` as needed, preserving directory structure.
 - **Use the CLI**: Run the generator for each target tool, including any custom tools from `.caspec.yml`.
 
 ```bash
@@ -68,14 +68,14 @@ tools:
   - name: custom_agent
     instructionsFile: CUSTOM_AGENT.md
     skillsDirectory: .custom_agent/skills
-    subagentsDirectory: .custom_agent/subagents
+    agentsDirectory: .custom_agent/agents
 ```
 
 Fields:
 - `name`: Tool name used on the CLI and in `<!-- CASPEC:{TOOL} -->` blocks
 - `instructionsFile`: Generated file name
 - `skillsDirectory`: Destination for expanded skills (optional)
-- `subagentsDirectory`: Destination for expanded subagents (optional)
+- `agentsDirectory`: Destination for expanded agents (optional)
 
 ## Add caspec outputs to .gitignore
 `generate-gitignore` prints gitignore entries for the tools you specify. Copy and paste the snippet below to append them to your `.gitignore`:

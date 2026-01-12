@@ -85,7 +85,7 @@ struct CASpecGeneratorTests {
             contents: "Skill Shared"
         )
         try fileSystem.writeFile(
-            path: rootPath.appendingPathComponent(".caspec/subagents/reviewer/AGENT.md"),
+            path: rootPath.appendingPathComponent(".caspec/agents/reviewer/AGENT.md"),
             contents: "Agent Shared"
         )
 
@@ -106,7 +106,7 @@ struct CASpecGeneratorTests {
             atPath: rootPath.appendingPathComponent(".claude/skills/test/SKILL.md").path
         ))
         #expect(fileSystem.fileExists(
-            atPath: rootPath.appendingPathComponent(".claude/subagents/reviewer/AGENT.md").path
+            atPath: rootPath.appendingPathComponent(".claude/agents/reviewer/AGENT.md").path
         ))
     }
 

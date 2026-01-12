@@ -5,7 +5,7 @@ caspec is a CLI tool that unifies documentation management across different AI c
 ## Why caspec?
 
 Different AI coding agent tools use different documentation formats:
-- **Claude Code**: Uses `CLAUDE.md` for project guidance, supports skills and subagents
+- **Claude Code**: Uses `CLAUDE.md` for project guidance, supports skills and agents
 - **Codex**: Uses `AGENTS.md` for agent guidance, supports skills only
 
 When using multiple tools on the same project, you end up duplicating content across multiple files. caspec solves this by letting you write once and generate for all tools.
@@ -37,9 +37,9 @@ This content only appears in CLAUDE.md (Claude Code)
 - Content outside blocks appears in all generated files
 - Tool-specific blocks only appear in their respective outputs
 
-### 2. Skills and Subagents Auto-Expansion
+### 2. Skills and Agents Auto-Expansion
 
-Place your skills and subagents in `.caspec/` directory. caspec automatically expands them to the appropriate locations:
+Place your skills and agents in `.caspec/` directory. caspec automatically expands them to the appropriate locations:
 
 ```
 .caspec/
@@ -50,7 +50,7 @@ Place your skills and subagents in `.caspec/` directory. caspec automatically ex
 │   │   └── helpers.sh
 │   └── AnotherSkill/
 │       └── SKILL.md
-└── subagents/
+└── agents/
     └── MyAgent/
         └── AGENT.md
 ```
@@ -58,11 +58,11 @@ Place your skills and subagents in `.caspec/` directory. caspec automatically ex
 **Expansion Rules**:
 - `.caspec/skills/MySkill/` → `.codex/skills/MySkill/` (for Codex)
 - `.caspec/skills/MySkill/` → `.claude/skills/MySkill/` (for Claude Code)
-- `.caspec/subagents/MyAgent/` → `.claude/subagents/MyAgent/` (Claude Code only)
+- `.caspec/agents/MyAgent/` → `.claude/agents/MyAgent/` (Claude Code only)
 
-All files within skill/subagent directories are copied, preserving the directory structure. You can also use `<!-- CASPEC:{TOOL} -->` syntax inside these files.
+All files within skill/agent directories are copied, preserving the directory structure. You can also use `<!-- CASPEC:{TOOL} -->` syntax inside these files.
 
-**Note**: Subagents are Claude Code-specific, so they're only expanded for Claude Code, not Codex.
+**Note**: Agents are Claude Code-specific, so they're only expanded for Claude Code, not Codex.
 
 ## CLI Usage
 
@@ -91,14 +91,14 @@ tools:
   - name: custom_agent
     instructionsFile: CUSTOM_AGENT.md
     skillsDirectory: .custom_agent/skills
-    subagentsDirectory: .custom_agent/subagents
+    agentsDirectory: .custom_agent/agents
 ```
 
 Fields:
 - `name`: Tool name used on the CLI and in `<!-- CASPEC:{TOOL} -->` blocks
 - `instructionsFile`: Generated file name
 - `skillsDirectory`: Destination for expanded skills (optional)
-- `subagentsDirectory`: Destination for expanded subagents (optional)
+- `agentsDirectory`: Destination for expanded agents (optional)
 
 ### Generated Files
 
@@ -109,7 +109,7 @@ Fields:
 **For Claude Code** (`caspec claude`):
 - `CLAUDE.md` (from CASPEC.md, with claude-specific blocks)
 - `.claude/skills/` (expanded from `.caspec/skills/`)
-- `.claude/subagents/` (expanded from `.caspec/subagents/`)
+- `.claude/agents/` (expanded from `.caspec/agents/`)
 
 ## Example
 
@@ -134,7 +134,7 @@ Use the `codex-test` skill to run tests.
 ## Claude Code Notes
 
 Use the `claude-test` skill to run tests.
-You can also use the `reviewer` subagent for code review.
+You can also use the `reviewer` agent for code review.
 <!-- CASPEC -->
 ```
 
@@ -149,14 +149,14 @@ my-project/
 │   ├── skills/
 │   │   └── test/
 │   │       └── SKILL.md
-│   └── subagents/
+│   └── agents/
 │       └── reviewer/
 │           └── AGENT.md
 ├── .claude/                    # Generated - don't edit directly
 │   ├── skills/
 │   │   └── test/
 │   │       └── SKILL.md
-│   └── subagents/
+│   └── agents/
 │       └── reviewer/
 │           └── AGENT.md
 └── .codex/                     # Generated - don't edit directly

@@ -9,19 +9,19 @@ public struct Tool: Hashable, Sendable, Codable {
     /// Destination directory for expanded skills.
     public let skillsDirectory: String?
 
-    /// Destination directory for expanded subagents.
-    public let subagentsDirectory: String?
+    /// Destination directory for expanded agents.
+    public let agentsDirectory: String?
 
     public init(
         name: String,
         instructionsFile: String,
         skillsDirectory: String?,
-        subagentsDirectory: String?
+        agentsDirectory: String?
     ) {
         self.name = name
         self.instructionsFile = instructionsFile
         self.skillsDirectory = skillsDirectory
-        self.subagentsDirectory = subagentsDirectory
+        self.agentsDirectory = agentsDirectory
     }
 }
 
@@ -31,7 +31,7 @@ extension Tool {
         name: "codex",
         instructionsFile: "AGENTS.md",
         skillsDirectory: ".codex/skills",
-        subagentsDirectory: nil
+        agentsDirectory: nil
     )
 
     /// Claude Code output (`CLAUDE.md` and `.claude/`).
@@ -39,7 +39,7 @@ extension Tool {
         name: "claude",
         instructionsFile: "CLAUDE.md",
         skillsDirectory: ".claude/skills",
-        subagentsDirectory: ".claude/subagents"
+        agentsDirectory: ".claude/agents"
     )
 
     /// Default tools supported by CASpec.

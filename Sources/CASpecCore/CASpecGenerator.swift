@@ -22,7 +22,7 @@ public struct CASpecGenerator {
         try writeSpecOutput(filteredSpec, to: outputs)
 
         try generateSkills(from: directory, outputs: outputs, tool: tool)
-        try generateSubagents(from: directory, outputs: outputs, tool: tool)
+        try generateAgents(from: directory, outputs: outputs, tool: tool)
     }
 }
 
@@ -56,14 +56,14 @@ extension CASpecGenerator {
         try copyDirectoryContents(from: sourcePath, to: destinationPath, tool: tool)
     }
 
-    fileprivate func generateSubagents(
+    fileprivate func generateAgents(
         from directory: CASpecDirectory,
         outputs: CASpecDirectory.ToolOutputs,
         tool: Tool
     ) throws {
-        let sourcePath = directory.caspecSubagentsPath
+        let sourcePath = directory.caspecAgentsPath
         guard fileSystem.fileExists(atPath: sourcePath.path),
-              let destinationPath = outputs.subagentsPath else { return }
+              let destinationPath = outputs.agentsPath else { return }
         try copyDirectoryContents(from: sourcePath, to: destinationPath, tool: tool)
     }
 

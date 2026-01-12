@@ -56,8 +56,8 @@ public struct CASpecGitignore: Sendable {
             if let skillsDirectory = tool.skillsDirectory {
                 appendUnique(normalizeDirectory(skillsDirectory))
             }
-            if let subagentsDirectory = tool.subagentsDirectory {
-                appendUnique(normalizeDirectory(subagentsDirectory))
+            if let agentsDirectory = tool.agentsDirectory {
+                appendUnique(normalizeDirectory(agentsDirectory))
             }
         }
 
