@@ -5,7 +5,7 @@ Write once in `AGENT_GUIDELINES.md`, then generate not only the agent-specific g
 ## How It Works
 - **Copy from a single source**: `AGENT_GUIDELINES.md` is the canonical document. agent-adapter reads it and generates agent-specific files such as `AGENTS.md` and `CLAUDE.md`.
 - **Skills and agents are generated too**: Place reusable skills and (for Claude) agents in `.agent-adapter/`. They are expanded into `.codex/` and `.claude/` as needed, preserving directory structure so the full skill/agent sets stay aligned.
-- **Use the CLI**: Run the generator for each target agent, including any custom agents from `.agent-adapter.yml`.
+- **Use the CLI**: Run the generator for each target agent, including any custom agents from `agent-adapter.yml`.
 
 ## Usages
 ```bash
@@ -15,7 +15,7 @@ agent-adapter generate-config codex
 # Generate `CLAUDE.md` and `.claude/skills` and `.claude/agents` from Claude Code.
 agent-adapter generate-config claude
 
-# Generate a custom agent from .agent-adapter.yml
+# Generate a custom agent from agent-adapter.yml
 agent-adapter generate-config custom_agent
 
 # Generate multiple agents at once
@@ -28,7 +28,7 @@ agent-adapter can generate configurations for specific agents.
 The followings are the original files and agent-adapter can generate configurations for a specific agent.
 
 - AGENT_GUIDELINES.md: A guideline for coding agents. This will be copied as an instruction file such as `AGENTS.md` and `CLAUDE.md`
-- .agent-adapter.yml: A setting file of agent-adapter. Edit this file when you want to add a custom agent.
+- agent-adapter.yml: A setting file of agent-adapter. Edit this file when you want to add a custom agent.
 - .agent-adapter/: A directory where contains skills and agents directories.
 
 This is a basic directory structure.
@@ -36,7 +36,7 @@ This is a basic directory structure.
 ```
 .
 ├── AGENT_GUIDELINES.md
-├── .agent-adapter.yml
+├── agent-adapter.yml
 └── .agent-adapter/
     ├── skills/
     │   ├── <SkillName>/
@@ -72,7 +72,7 @@ agent-adapter supports this syntax on not only AGENT_GUIDELINES.md, but also all
 So, you can use this syntax on skills and agents.
 
 ### Custom Agents
-agent-adapter supports only Codex and Claude Code for now, but you can define or override agents in `.agent-adapter.yml`.
+agent-adapter supports only Codex and Claude Code for now, but you can define or override agents in `agent-adapter.yml`.
 
 ```yaml
 agents:

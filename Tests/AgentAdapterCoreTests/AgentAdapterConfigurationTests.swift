@@ -18,7 +18,7 @@ struct AgentAdapterConfigurationTests {
                 skillsDirectory: .custom_agent/skills
                 agentsDirectory: .custom_agent/agents
             """,
-            to: rootPath.appendingPathComponent(".agent-adapter.yml"),
+            to: rootPath.appendingPathComponent("agent-adapter.yml"),
             atomically: true,
             encoding: .utf8
         )

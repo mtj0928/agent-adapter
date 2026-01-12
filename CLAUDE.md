@@ -33,7 +33,7 @@ This content only appears in CLAUDE.md (Claude Code)
 **Syntax Rules**:
 - `<!-- AGENT_ADAPTER:{AGENT} -->` starts an agent-specific block
 - `<!-- AGENT_ADAPTER -->` ends an agent-specific block
-- `{AGENT}` can be `codex`, `claude`, or any custom agent name defined in `.agent-adapter.yml`
+- `{AGENT}` can be `codex`, `claude`, or any custom agent name defined in `agent-adapter.yml`
 - Content outside blocks appears in all generated files
 - Agent-specific blocks only appear in their respective outputs
 
@@ -73,15 +73,15 @@ $ agent-adapter generate-config codex
 # Generate config for Claude Code
 $ agent-adapter generate-config claude
 
-# Generate config for a custom agent from .agent-adapter.yml
+# Generate config for a custom agent from agent-adapter.yml
 $ agent-adapter generate-config custom_agent
 
 # Output gitignore entries for specific agents
 $ agent-adapter generate-gitignore codex claude
 ```
 
-### Custom Agents via .agent-adapter.yml
-Define or override agents in `.agent-adapter.yml`. When an agent name matches a default, it overrides the defaults.
+### Custom Agents via agent-adapter.yml
+Define or override agents in `agent-adapter.yml`. When an agent name matches a default, it overrides the defaults.
 
 ```yaml
 agents:

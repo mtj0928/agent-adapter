@@ -1,7 +1,7 @@
 import Foundation
 import Yams
 
-/// Configuration stored in `.agent-adapter.yml` for defining custom agents.
+/// Configuration stored in `agent-adapter.yml` for defining custom agents.
 public struct AgentAdapterConfiguration: Sendable, Decodable {
     /// Agent definitions provided by the configuration file.
     public let agents: [Agent]
@@ -14,7 +14,7 @@ public struct AgentAdapterConfiguration: Sendable, Decodable {
 
 extension AgentAdapterConfiguration {
     /// The default configuration file name.
-    public static let fileName = ".agent-adapter.yml"
+    public static let fileName = "agent-adapter.yml"
 
     /// Loads configuration from the provided root path if a config file exists.
     public static func load(from rootPath: URL, fileSystem: FileSystem) throws -> AgentAdapterConfiguration? {

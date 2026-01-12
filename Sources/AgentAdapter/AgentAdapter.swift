@@ -14,7 +14,7 @@ struct AgentAdapter: AsyncParsableCommand {
             commandName: "generate-config"
         )
 
-        @Argument(help: "Target agents to generate config for (codex, claude, or custom from .agent-adapter.yml).")
+        @Argument(help: "Target agents to generate config for (codex, claude, or custom from agent-adapter.yml).")
         var targets: [String] = []
 
         mutating func run() async throws {
@@ -56,7 +56,7 @@ struct AgentAdapter: AsyncParsableCommand {
             commandName: "generate-gitignore"
         )
 
-        @Argument(help: "Agent names to include alongside agents from .agent-adapter.yml.")
+        @Argument(help: "Agent names to include alongside agents from agent-adapter.yml.")
         var targets: [String] = []
 
         mutating func run() throws {

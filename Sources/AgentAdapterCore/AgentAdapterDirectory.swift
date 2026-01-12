@@ -16,7 +16,7 @@ public struct AgentAdapterDirectory: Sendable {
         rootPath.appendingPathComponent("AGENT_GUIDELINES.md")
     }
 
-    /// The path to the optional configuration file (`.agent-adapter.yml`).
+    /// The path to the optional configuration file (`agent-adapter.yml`).
     public var configFilePath: URL {
         rootPath.appendingPathComponent(AgentAdapterConfiguration.fileName)
     }
