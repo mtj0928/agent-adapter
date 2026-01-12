@@ -1,6 +1,6 @@
 # agent-adapter
 A CLI tool for managing agent documentation from a single source. 
-Write once in `AGENT_GUIDELINES.md`, then generate the right files for each tool so your guidance stays consistent and up to date.
+Write once in `AGENT_GUIDELINES.md`, then sync the right files for each tool so your guidance stays consistent and up to date.
 
 ## Install
 ### Homebrew
@@ -40,22 +40,22 @@ cp .build/release/agent-adapter /usr/local/bin/
 agent-adapter currently supports Codex and Claude Code. You can also define custom tools in `.agent-adapter.yml`.
 
 ## How It Works
-- **Copy from a single source**: `AGENT_GUIDELINES.md` is the canonical document. agent-adapter reads it and generates tool-specific files such as `AGENTS.md` and `CLAUDE.md`.
+- **Copy from a single source**: `AGENT_GUIDELINES.md` is the canonical document. agent-adapter reads it and syncs tool-specific files such as `AGENTS.md` and `CLAUDE.md`.
 - **Skills and agents**: Place reusable skills and (for Claude) agents in `agent-adapter/`. They are expanded into `.codex/` and `.claude/` as needed, preserving directory structure.
 - **Use the CLI**: Run the generator for each target tool, including any custom tools from `.agent-adapter.yml`.
 
 ```bash
-# Generate Codex outputs
-agent-adapter codex
+# Sync Codex outputs
+agent-adapter sync-config codex
 
-# Generate Claude Code outputs
-agent-adapter claude
+# Sync Claude Code outputs
+agent-adapter sync-config claude
 
-# Generate a custom tool from .agent-adapter.yml
-agent-adapter custom_agent
+# Sync a custom tool from .agent-adapter.yml
+agent-adapter sync-config custom_agent
 
-# Generate multiple tools at once
-agent-adapter claude codex
+# Sync multiple tools at once
+agent-adapter sync-config claude codex
 ```
 
 ### AGENT_GUIDELINES.md Syntax
@@ -64,7 +64,7 @@ agent-adapter claude codex
 ```markdown
 # Project Title
 
-This text appears in all generated files.
+This text appears in all synced files.
 
 <!-- AGENT_ADAPTER:codex -->
 This text appears only in AGENTS.md.
@@ -93,7 +93,7 @@ tools:
 
 Fields:
 - `name`: Tool name used on the CLI and in `<!-- AGENT_ADAPTER:{TOOL} -->` blocks
-- `guidelinesFile`: Generated file name
+- `guidelinesFile`: Synced file name
 - `skillsDirectory`: Destination for expanded skills (optional)
 - `agentsDirectory`: Destination for expanded agents (optional)
 
