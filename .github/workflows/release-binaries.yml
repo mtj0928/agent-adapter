@@ -1,0 +1,52 @@
+name: Release Binaries
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-upload:
+    name: Build and Upload (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS (universal)
+            os: macos-14
+            asset_suffix: macos-universal
+            build_args: "--arch arm64 --arch x86_64"
+          - name: Linux (x86_64)
+            os: ubuntu-22.04
+            asset_suffix: linux-x86_64
+            build_args: "--static-swift-stdlib"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.2"
+      - name: Build release binary
+        run: |
+          swift build -c release ${{ matrix.build_args }}
+          BIN_PATH=$(swift build -c release ${{ matrix.build_args }} --show-bin-path)
+          echo "bin_path=${BIN_PATH}" >> "$GITHUB_OUTPUT"
+        id: build
+      - name: Package binary
+        run: |
+          BIN_PATH="${{ steps.build.outputs.bin_path }}"
+          ASSET_NAME="caspec-${{ matrix.asset_suffix }}.tar.gz"
+          tar -czf "$ASSET_NAME" -C "$BIN_PATH" caspec
+          echo "asset_name=${ASSET_NAME}" >> "$GITHUB_OUTPUT"
+        id: package
+      - name: Upload binary to release
+        run: |
+          TAG_NAME="${{ github.event.release.tag_name }}"
+          ASSET_NAME="${{ steps.package.outputs.asset_name }}"
+          gh release upload "$TAG_NAME" "$ASSET_NAME" --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
