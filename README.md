@@ -3,10 +3,17 @@ A CLI tool for managing agent documentation from a single source.
 Write once in `CASPEC.md`, then generate the right files for each tool so your guidance stays consistent and up to date.
 
 ## Install
-Currently, the tool is installed by building the Swift package:
+You can install via [nest](https://github.com/mtj0928/nest) (macOS only), or build the Swift package:
 
 ```bash
-swift build
+nest install mtj0928/caspec
+```
+
+Build from source (move the built binary to a location on your PATH):
+
+```bash
+swift build -c release
+cp .build/release/caspec /usr/local/bin/
 ```
 
 ## Supported Agents
