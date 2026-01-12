@@ -109,6 +109,27 @@ struct CASpecGeneratorTests {
             atPath: rootPath.appendingPathComponent(".claude/subagents/reviewer/AGENT.md").path
         ))
     }
+
+    @Test func throwsOnNestedCaspecBlocks() {
+        let rootPath = URL(fileURLWithPath: "/root")
+        let fileSystem = InMemoryFileSystem()
+        #expect(throws: CASpecGenerator.CASpecGeneratorError.self) {
+            try fileSystem.createDirectory(at: rootPath, withIntermediateDirectories: true)
+            try fileSystem.writeFile(
+                path: rootPath.appendingPathComponent("CASPEC.md"),
+                contents: """
+                <!-- CASPEC:foo -->
+                Start Foo
+                <!-- CASPEC:bar -->
+                Start Bar
+                <!-- CASPEC -->
+                """
+            )
+
+            let generator = CASpecGenerator(fileSystem: fileSystem)
+            try generator.generate(in: rootPath, tool: .codex)
+        }
+    }
 }
 
 extension FileSystem {
