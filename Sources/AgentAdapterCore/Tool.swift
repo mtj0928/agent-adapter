@@ -3,8 +3,8 @@ public struct Tool: Hashable, Sendable, Codable {
     /// Tool name used for AGENT_ADAPTER block filtering (e.g. "codex").
     public let name: String
 
-    /// Instructions file name (e.g. "AGENTS.md").
-    public let instructionsFile: String
+    /// Guidelines file name (e.g. "AGENTS.md").
+    public let guidelinesFile: String
 
     /// Destination directory for expanded skills.
     public let skillsDirectory: String?
@@ -14,12 +14,12 @@ public struct Tool: Hashable, Sendable, Codable {
 
     public init(
         name: String,
-        instructionsFile: String,
+        guidelinesFile: String,
         skillsDirectory: String?,
         agentsDirectory: String?
     ) {
         self.name = name
-        self.instructionsFile = instructionsFile
+        self.guidelinesFile = guidelinesFile
         self.skillsDirectory = skillsDirectory
         self.agentsDirectory = agentsDirectory
     }
@@ -29,7 +29,7 @@ extension Tool {
     /// Codex tool output (`AGENTS.md` and `.codex/`).
     public static let codex = Tool(
         name: "codex",
-        instructionsFile: "AGENTS.md",
+        guidelinesFile: "AGENTS.md",
         skillsDirectory: ".codex/skills",
         agentsDirectory: nil
     )
@@ -37,7 +37,7 @@ extension Tool {
     /// Claude Code output (`CLAUDE.md` and `.claude/`).
     public static let claude = Tool(
         name: "claude",
-        instructionsFile: "CLAUDE.md",
+        guidelinesFile: "CLAUDE.md",
         skillsDirectory: ".claude/skills",
         agentsDirectory: ".claude/agents"
     )

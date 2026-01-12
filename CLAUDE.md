@@ -86,17 +86,17 @@ Define or override tools in `.agent-adapter.yml`. When a tool name matches a def
 ```yaml
 tools:
   - name: codex
-    instructionsFile: CUSTOM.md
+    guidelinesFile: CUSTOM.md
     skillsDirectory: .custom/skills
   - name: custom_agent
-    instructionsFile: CUSTOM_AGENT.md
+    guidelinesFile: CUSTOM_AGENT.md
     skillsDirectory: .custom_agent/skills
     agentsDirectory: .custom_agent/agents
 ```
 
 Fields:
 - `name`: Tool name used on the CLI and in `<!-- AGENT_ADAPTER:{TOOL} -->` blocks
-- `instructionsFile`: Generated file name
+- `guidelinesFile`: Generated file name
 - `skillsDirectory`: Destination for expanded skills (optional)
 - `agentsDirectory`: Destination for expanded agents (optional)
 

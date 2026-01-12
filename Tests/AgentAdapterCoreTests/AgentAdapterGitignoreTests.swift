@@ -5,7 +5,7 @@ struct AgentAdapterGitignoreTests {
     @Test func renderGroupsEntriesWithToolComments() {
         let custom = Tool(
             name: "custom",
-            instructionsFile: "CUSTOM.md",
+            guidelinesFile: "CUSTOM.md",
             skillsDirectory: ".custom/skills",
             agentsDirectory: ".custom/agents"
         )
@@ -29,7 +29,7 @@ struct AgentAdapterGitignoreTests {
         let config = AgentAdapterConfiguration(tools: [
             Tool(
                 name: "custom",
-                instructionsFile: "CUSTOM.md",
+                guidelinesFile: "CUSTOM.md",
                 skillsDirectory: ".custom/skills",
                 agentsDirectory: nil
             )

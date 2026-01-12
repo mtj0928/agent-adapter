@@ -42,7 +42,7 @@ extension AgentAdapterGenerator {
     }
 
     fileprivate func writeSpecOutput(_ contents: String, to outputs: AgentAdapterDirectory.ToolOutputs) throws {
-        try fileSystem.writeString(contents, to: outputs.specFilePath, atomically: true, encoding: .utf8)
+        try fileSystem.writeString(contents, to: outputs.guidelinesFilePath, atomically: true, encoding: .utf8)
     }
 
     fileprivate func generateSkills(
@@ -52,7 +52,7 @@ extension AgentAdapterGenerator {
     ) throws {
         let sourcePath = directory.agentAdapterSkillsPath
         guard fileSystem.fileExists(atPath: sourcePath.path),
-              let destinationPath = outputs.skillsPath else { return }
+              let destinationPath = outputs.skillsDirectoryPath else { return }
         try copyDirectoryContents(from: sourcePath, to: destinationPath, tool: tool)
     }
 
@@ -63,7 +63,7 @@ extension AgentAdapterGenerator {
     ) throws {
         let sourcePath = directory.agentAdapterAgentsPath
         guard fileSystem.fileExists(atPath: sourcePath.path),
-              let destinationPath = outputs.agentsPath else { return }
+              let destinationPath = outputs.agentsDirectoryPath else { return }
         try copyDirectoryContents(from: sourcePath, to: destinationPath, tool: tool)
     }
 

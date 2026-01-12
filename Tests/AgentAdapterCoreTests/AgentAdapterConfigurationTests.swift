@@ -11,10 +11,10 @@ struct AgentAdapterConfigurationTests {
             """
             tools:
               - name: codex
-                instructionsFile: CUSTOM.md
+                guidelinesFile: CUSTOM.md
                 skillsDirectory: .custom/skills
               - name: custom_agent
-                instructionsFile: CUSTOM_AGENT.md
+                guidelinesFile: CUSTOM_AGENT.md
                 skillsDirectory: .custom_agent/skills
                 agentsDirectory: .custom_agent/agents
             """,
@@ -28,12 +28,12 @@ struct AgentAdapterConfigurationTests {
 
         #expect(resolved["claude"] != nil)
         let codex = try #require(resolved["codex"])
-        #expect(codex.instructionsFile == "CUSTOM.md")
+        #expect(codex.guidelinesFile == "CUSTOM.md")
         #expect(codex.skillsDirectory == ".custom/skills")
         #expect(codex.agentsDirectory == nil)
 
         let customAgent = try #require(resolved["custom_agent"])
-        #expect(customAgent.instructionsFile == "CUSTOM_AGENT.md")
+        #expect(customAgent.guidelinesFile == "CUSTOM_AGENT.md")
         #expect(customAgent.agentsDirectory == ".custom_agent/agents")
     }
 }

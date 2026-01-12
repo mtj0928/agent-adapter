@@ -52,18 +52,18 @@ extension AgentAdapterDirectory {
         /// The tool variant used for output paths.
         public let tool: Tool
 
-        /// The output path for the generated spec file (e.g. `AGENTS.md`).
-        public var specFilePath: URL {
-            rootPath.appendingPathComponent(tool.instructionsFile)
+        /// The output path for the generated guidelines file (e.g. `AGENTS.md`).
+        public var guidelinesFilePath: URL {
+            rootPath.appendingPathComponent(tool.guidelinesFile)
         }
 
         /// The output path for generated skills, if applicable.
-        public var skillsPath: URL? {
+        public var skillsDirectoryPath: URL? {
             tool.skillsDirectory.map { rootPath.appendingPathComponent($0) }
         }
 
         /// The output path for generated agents, if applicable.
-        public var agentsPath: URL? {
+        public var agentsDirectoryPath: URL? {
             tool.agentsDirectory.map { rootPath.appendingPathComponent($0) }
         }
     }

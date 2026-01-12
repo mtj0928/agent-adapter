@@ -18,13 +18,13 @@ struct AgentAdapterDirectoryTests {
         let directory = AgentAdapterDirectory(rootPath: rootPath)
 
         let codexOutputs = directory.outputs(for: .codex)
-        #expect(codexOutputs.specFilePath == rootPath.appendingPathComponent("AGENTS.md"))
-        #expect(codexOutputs.skillsPath == rootPath.appendingPathComponent(".codex/skills"))
-        #expect(codexOutputs.agentsPath == nil)
+        #expect(codexOutputs.guidelinesFilePath == rootPath.appendingPathComponent("AGENTS.md"))
+        #expect(codexOutputs.skillsDirectoryPath == rootPath.appendingPathComponent(".codex/skills"))
+        #expect(codexOutputs.agentsDirectoryPath == nil)
 
         let claudeOutputs = directory.outputs(for: .claude)
-        #expect(claudeOutputs.specFilePath == rootPath.appendingPathComponent("CLAUDE.md"))
-        #expect(claudeOutputs.skillsPath == rootPath.appendingPathComponent(".claude/skills"))
-        #expect(claudeOutputs.agentsPath == rootPath.appendingPathComponent(".claude/agents"))
+        #expect(claudeOutputs.guidelinesFilePath == rootPath.appendingPathComponent("CLAUDE.md"))
+        #expect(claudeOutputs.skillsDirectoryPath == rootPath.appendingPathComponent(".claude/skills"))
+        #expect(claudeOutputs.agentsDirectoryPath == rootPath.appendingPathComponent(".claude/agents"))
     }
 }

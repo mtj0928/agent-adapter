@@ -55,7 +55,7 @@ public struct AgentAdapterGitignore: Sendable {
                 lines.append("")
             }
             lines.append("# \(tool.name)")
-            appendUnique(tool.instructionsFile)
+            appendUnique(tool.guidelinesFile)
             if let skillsDirectory = tool.skillsDirectory {
                 appendUnique(normalizeDirectory(skillsDirectory))
             }
