@@ -2,13 +2,13 @@ import Testing
 @testable import AgentAdapterCore
 
 struct AgentAdapterFormatTests {
-    @Test func blockStartUsesToolName() {
-        #expect(AgentAdapterFormat.blockStart(toolName: "codex") == "<!-- AGENT_ADAPTER:codex -->")
+    @Test func blockStartUsesAgentName() {
+        #expect(AgentAdapterFormat.blockStart(agentName: "codex") == "<!-- AGENT_ADAPTER:codex -->")
     }
 
-    @Test func parseBlockStartExtractsToolName() {
+    @Test func parseBlockStartExtractsAgentName() {
         #expect(AgentAdapterFormat.parseBlockStart(line: "<!-- AGENT_ADAPTER:claude -->") == "claude")
-        #expect(AgentAdapterFormat.parseBlockStart(line: "  <!-- AGENT_ADAPTER:tool -->  ") == "tool")
+        #expect(AgentAdapterFormat.parseBlockStart(line: "  <!-- AGENT_ADAPTER:agent -->  ") == "agent")
     }
 
     @Test func parseBlockStartRejectsInvalidLines() {

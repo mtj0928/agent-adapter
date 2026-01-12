@@ -22,7 +22,7 @@ struct AgentAdapterGeneratorTests {
         )
 
         try fileSystem.writeFile(
-            path: rootPath.appendingPathComponent("agent-adapter/skills/test/SKILL.md"),
+            path: rootPath.appendingPathComponent(".agent-adapter/skills/test/SKILL.md"),
             contents: """
             Skill Shared
             <!-- AGENT_ADAPTER:codex -->
@@ -35,7 +35,7 @@ struct AgentAdapterGeneratorTests {
         )
 
         let generator = AgentAdapterGenerator(fileSystem: fileSystem)
-        try generator.generate(in: rootPath, tool: .codex)
+        try generator.generate(in: rootPath, agent: .codex)
 
         let agents = try fileSystem.readString(
             at: rootPath.appendingPathComponent("AGENTS.md"),
@@ -81,16 +81,16 @@ struct AgentAdapterGeneratorTests {
         )
 
         try fileSystem.writeFile(
-            path: rootPath.appendingPathComponent("agent-adapter/skills/test/SKILL.md"),
+            path: rootPath.appendingPathComponent(".agent-adapter/skills/test/SKILL.md"),
             contents: "Skill Shared"
         )
         try fileSystem.writeFile(
-            path: rootPath.appendingPathComponent("agent-adapter/agents/reviewer/AGENT.md"),
+            path: rootPath.appendingPathComponent(".agent-adapter/agents/reviewer/AGENT.md"),
             contents: "Agent Shared"
         )
 
         let generator = AgentAdapterGenerator(fileSystem: fileSystem)
-        try generator.generate(in: rootPath, tool: .claude)
+        try generator.generate(in: rootPath, agent: .claude)
 
         let claude = try fileSystem.readString(
             at: rootPath.appendingPathComponent("CLAUDE.md"),
@@ -127,7 +127,7 @@ struct AgentAdapterGeneratorTests {
             )
 
             let generator = AgentAdapterGenerator(fileSystem: fileSystem)
-            try generator.generate(in: rootPath, tool: .codex)
+            try generator.generate(in: rootPath, agent: .codex)
         }
     }
 }

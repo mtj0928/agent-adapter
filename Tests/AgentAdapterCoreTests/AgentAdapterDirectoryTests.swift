@@ -8,12 +8,12 @@ struct AgentAdapterDirectoryTests {
         let directory = AgentAdapterDirectory(rootPath: rootPath)
 
         #expect(directory.specFilePath == rootPath.appendingPathComponent("AGENT_GUIDELINES.md"))
-        #expect(directory.agentAdapterRootPath == rootPath.appendingPathComponent("agent-adapter"))
-        #expect(directory.agentAdapterSkillsPath == rootPath.appendingPathComponent("agent-adapter/skills"))
-        #expect(directory.agentAdapterAgentsPath == rootPath.appendingPathComponent("agent-adapter/agents"))
+        #expect(directory.agentAdapterRootPath == rootPath.appendingPathComponent(".agent-adapter"))
+        #expect(directory.agentAdapterSkillsPath == rootPath.appendingPathComponent(".agent-adapter/skills"))
+        #expect(directory.agentAdapterAgentsPath == rootPath.appendingPathComponent(".agent-adapter/agents"))
     }
 
-    @Test func buildsToolOutputPaths() {
+    @Test func buildsAgentOutputPaths() {
         let rootPath = URL(fileURLWithPath: "/root")
         let directory = AgentAdapterDirectory(rootPath: rootPath)
 

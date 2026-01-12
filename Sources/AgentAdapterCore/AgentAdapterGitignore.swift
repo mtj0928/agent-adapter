@@ -5,42 +5,42 @@ public struct AgentAdapterGitignore: Sendable {
     /// Creates a gitignore generator.
     public init() {}
 
-    /// Resolves tools for gitignore generation from targets and configuration.
-    public static func toolsForGitignore(
-        targetToolNames: [String],
+    /// Resolves agents for gitignore generation from targets and configuration.
+    public static func agentsForGitignore(
+        targetAgentNames: [String],
         config: AgentAdapterConfiguration?,
-        defaults: [Tool] = Tool.defaults
-    ) throws -> [Tool] {
-        let toolsByName = config?.resolvedTools(defaults: defaults)
+        defaults: [Agent] = Agent.defaults
+    ) throws -> [Agent] {
+        let agentsByName = config?.resolvedAgents(defaults: defaults)
             ?? Dictionary(uniqueKeysWithValues: defaults.map { ($0.name, $0) })
 
-        var tools: [Tool] = []
-        var unknownToolNames: [String] = []
+        var agents: [Agent] = []
+        var unknownAgentNames: [String] = []
         var seen = Set<String>()
 
-        for name in targetToolNames {
+        for name in targetAgentNames {
             guard !seen.contains(name) else { continue }
             seen.insert(name)
 
-            if let tool = toolsByName[name] {
-                tools.append(tool)
+            if let agent = agentsByName[name] {
+                agents.append(agent)
             } else {
-                unknownToolNames.append(name)
+                unknownAgentNames.append(name)
             }
         }
 
-        guard unknownToolNames.isEmpty else {
-            throw AgentAdapterGitignoreError.unknownTools(
-                unknown: unknownToolNames,
-                available: Array(toolsByName.keys)
+        guard unknownAgentNames.isEmpty else {
+            throw AgentAdapterGitignoreError.unknownAgents(
+                unknown: unknownAgentNames,
+                available: Array(agentsByName.keys)
             )
         }
 
-        return tools
+        return agents
     }
 
     /// Renders gitignore entries as a single string separated by newlines.
-    public static func render(for tools: [Tool]) -> String {
+    public static func render(for agents: [Agent]) -> String {
         var lines: [String] = []
         var seen = Set<String>()
 
@@ -50,16 +50,16 @@ public struct AgentAdapterGitignore: Sendable {
             lines.append(entry)
         }
 
-        for (index, tool) in tools.enumerated() {
+        for (index, agent) in agents.enumerated() {
             if index > 0 {
                 lines.append("")
             }
-            lines.append("# \(tool.name)")
-            appendUnique(tool.guidelinesFile)
-            if let skillsDirectory = tool.skillsDirectory {
+            lines.append("# \(agent.name)")
+            appendUnique(agent.guidelinesFile)
+            if let skillsDirectory = agent.skillsDirectory {
                 appendUnique(normalizeDirectory(skillsDirectory))
             }
-            if let agentsDirectory = tool.agentsDirectory {
+            if let agentsDirectory = agent.agentsDirectory {
                 appendUnique(normalizeDirectory(agentsDirectory))
             }
         }
@@ -73,16 +73,16 @@ public struct AgentAdapterGitignore: Sendable {
 }
 
 extension AgentAdapterGitignore {
-    /// Errors thrown while resolving tools for gitignore generation.
+    /// Errors thrown while resolving agents for gitignore generation.
     public enum AgentAdapterGitignoreError: Error, LocalizedError {
-        case unknownTools(unknown: [String], available: [String])
+        case unknownAgents(unknown: [String], available: [String])
 
         public var errorDescription: String? {
             switch self {
-            case let .unknownTools(unknown, available):
+            case let .unknownAgents(unknown, available):
                 let names = unknown.sorted().joined(separator: ", ")
                 let availableNames = available.sorted().joined(separator: ", ")
-                return "Unknown tool(s) '\(names)'. Available tools: \(availableNames)"
+                return "Unknown agent(s) '\(names)'. Available agents: \(availableNames)"
             }
         }
     }

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Generates tool-specific documentation and configuration files from `AGENT_GUIDELINES.md`.
+/// Generates agent-specific documentation and configuration files from `AGENT_GUIDELINES.md`.
 public struct AgentAdapterGenerator {
     private let fileSystem: FileSystem
 
@@ -10,64 +10,64 @@ public struct AgentAdapterGenerator {
         self.fileSystem = fileSystem
     }
 
-    /// Generates tool-specific outputs in the given project root.
+    /// Generates agent-specific outputs in the given project root.
     /// - Parameters:
     ///   - rootPath: The project root containing `AGENT_GUIDELINES.md`.
-    ///   - tool: The tool variant to generate.
-    public func generate(in rootPath: URL, tool: Tool) throws {
+    ///   - agent: The agent variant to generate.
+    public func generate(in rootPath: URL, agent: Agent) throws {
         let directory = AgentAdapterDirectory(rootPath: rootPath)
-        let outputs = directory.outputs(for: tool)
+        let outputs = directory.outputs(for: agent)
         let specContents = try fileSystem.readString(at: directory.specFilePath, encoding: .utf8)
-        let filteredSpec = try filterContents(specContents, tool: tool)
+        let filteredSpec = try filterContents(specContents, agent: agent)
         try writeSpecOutput(filteredSpec, to: outputs)
 
-        try generateSkills(from: directory, outputs: outputs, tool: tool)
-        try generateAgents(from: directory, outputs: outputs, tool: tool)
+        try generateSkills(from: directory, outputs: outputs, agent: agent)
+        try generateAgents(from: directory, outputs: outputs, agent: agent)
     }
 }
 
 extension AgentAdapterGenerator {
     enum AgentAdapterGeneratorError: Error, LocalizedError {
-        case nestedBlockStart(line: Int, openTool: String, nestedTool: String)
+        case nestedBlockStart(line: Int, openAgent: String, nestedAgent: String)
 
         var errorDescription: String? {
             switch self {
-            case let .nestedBlockStart(line, openTool, nestedTool):
+            case let .nestedBlockStart(line, openAgent, nestedAgent):
                 """
                 Nested AGENT_ADAPTER block start found at line \(line): \
-                '\(nestedTool)' started before closing '\(openTool)'.
+                '\(nestedAgent)' started before closing '\(openAgent)'.
                 """
             }
         }
     }
 
-    fileprivate func writeSpecOutput(_ contents: String, to outputs: AgentAdapterDirectory.ToolOutputs) throws {
+    fileprivate func writeSpecOutput(_ contents: String, to outputs: AgentAdapterDirectory.AgentOutputs) throws {
         try fileSystem.writeString(contents, to: outputs.guidelinesFilePath, atomically: true, encoding: .utf8)
     }
 
     fileprivate func generateSkills(
         from directory: AgentAdapterDirectory,
-        outputs: AgentAdapterDirectory.ToolOutputs,
-        tool: Tool
+        outputs: AgentAdapterDirectory.AgentOutputs,
+        agent: Agent
     ) throws {
         let sourcePath = directory.agentAdapterSkillsPath
         guard fileSystem.fileExists(atPath: sourcePath.path),
               let destinationPath = outputs.skillsDirectoryPath else { return }
-        try copyDirectoryContents(from: sourcePath, to: destinationPath, tool: tool)
+        try copyDirectoryContents(from: sourcePath, to: destinationPath, agent: agent)
     }
 
     fileprivate func generateAgents(
         from directory: AgentAdapterDirectory,
-        outputs: AgentAdapterDirectory.ToolOutputs,
-        tool: Tool
+        outputs: AgentAdapterDirectory.AgentOutputs,
+        agent: Agent
     ) throws {
         let sourcePath = directory.agentAdapterAgentsPath
         guard fileSystem.fileExists(atPath: sourcePath.path),
               let destinationPath = outputs.agentsDirectoryPath else { return }
-        try copyDirectoryContents(from: sourcePath, to: destinationPath, tool: tool)
+        try copyDirectoryContents(from: sourcePath, to: destinationPath, agent: agent)
     }
 
-    fileprivate func copyDirectoryContents(from sourcePath: URL, to destinationPath: URL, tool: Tool) throws {
+    fileprivate func copyDirectoryContents(from sourcePath: URL, to destinationPath: URL, agent: Agent) throws {
         if !fileSystem.fileExists(atPath: destinationPath.path) {
             try fileSystem.createDirectory(at: destinationPath, withIntermediateDirectories: true)
         }
@@ -77,14 +77,14 @@ extension AgentAdapterGenerator {
             let destinationItemPath = destinationPath.appendingPathComponent(itemPath.lastPathComponent)
 
             if try fileSystem.isDirectory(at: itemPath) {
-                try copyDirectoryContents(from: itemPath, to: destinationItemPath, tool: tool)
+                try copyDirectoryContents(from: itemPath, to: destinationItemPath, agent: agent)
             } else {
-                try writeFilteredFile(from: itemPath, to: destinationItemPath, tool: tool)
+                try writeFilteredFile(from: itemPath, to: destinationItemPath, agent: agent)
             }
         }
     }
 
-    fileprivate func writeFilteredFile(from sourcePath: URL, to destinationPath: URL, tool: Tool) throws {
+    fileprivate func writeFilteredFile(from sourcePath: URL, to destinationPath: URL, agent: Agent) throws {
         try fileSystem.createDirectory(
             at: destinationPath.deletingLastPathComponent(),
             withIntermediateDirectories: true
@@ -92,7 +92,7 @@ extension AgentAdapterGenerator {
 
         if let data = try? fileSystem.readData(at: sourcePath),
            let text = String(data: data, encoding: .utf8) {
-            let filtered = try filterContents(text, tool: tool)
+            let filtered = try filterContents(text, agent: agent)
             try fileSystem.writeString(filtered, to: destinationPath, atomically: true, encoding: .utf8)
             return
         }
@@ -103,10 +103,10 @@ extension AgentAdapterGenerator {
         try fileSystem.copyItem(at: sourcePath, to: destinationPath)
     }
 
-    fileprivate func filterContents(_ contents: String, tool: Tool) throws -> String {
+    fileprivate func filterContents(_ contents: String, agent: Agent) throws -> String {
         enum BlockState {
             case all
-            case toolSpecific(String)
+            case agentSpecific(String)
         }
 
         var state = BlockState.all
@@ -115,15 +115,15 @@ extension AgentAdapterGenerator {
 
         for (index, lineSubsequence) in lines.enumerated() {
             let line = String(lineSubsequence)
-            if let startTool = AgentAdapterFormat.parseBlockStart(line: line) {
-                if case let .toolSpecific(openTool) = state {
+            if let startAgent = AgentAdapterFormat.parseBlockStart(line: line) {
+                if case let .agentSpecific(openAgent) = state {
                     throw AgentAdapterGeneratorError.nestedBlockStart(
                         line: index + 1,
-                        openTool: openTool,
-                        nestedTool: startTool
+                        openAgent: openAgent,
+                        nestedAgent: startAgent
                     )
                 }
-                state = .toolSpecific(startTool)
+                state = .agentSpecific(startAgent)
                 continue
             }
 
@@ -135,9 +135,9 @@ extension AgentAdapterGenerator {
             switch state {
             case .all:
                 output.append(line)
-            case .toolSpecific(let blockToolName) where blockToolName == tool.name:
+            case .agentSpecific(let blockAgentName) where blockAgentName == agent.name:
                 output.append(line)
-            case .toolSpecific:
+            case .agentSpecific:
                 break
             }
         }

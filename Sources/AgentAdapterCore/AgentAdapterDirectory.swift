@@ -16,55 +16,55 @@ public struct AgentAdapterDirectory: Sendable {
         rootPath.appendingPathComponent("AGENT_GUIDELINES.md")
     }
 
-    /// The path to the optional configuration file (`.agent-adapter.yml`).
+    /// The path to the optional configuration file (`agent-adapter.yml`).
     public var configFilePath: URL {
         rootPath.appendingPathComponent(AgentAdapterConfiguration.fileName)
     }
 
-    /// The path to the `agent-adapter` source directory.
+    /// The path to the `.agent-adapter` source directory.
     public var agentAdapterRootPath: URL {
-        rootPath.appendingPathComponent("agent-adapter")
+        rootPath.appendingPathComponent(".agent-adapter")
     }
 
-    /// The path to the `agent-adapter/skills` source directory.
+    /// The path to the `.agent-adapter/skills` source directory.
     public var agentAdapterSkillsPath: URL {
         agentAdapterRootPath.appendingPathComponent("skills")
     }
 
-    /// The path to the `agent-adapter/agents` source directory.
+    /// The path to the `.agent-adapter/agents` source directory.
     public var agentAdapterAgentsPath: URL {
         agentAdapterRootPath.appendingPathComponent("agents")
     }
 
-    /// Returns tool-specific output paths derived from the project root.
-    /// - Parameter tool: The tool variant to generate.
-    public func outputs(for tool: Tool) -> ToolOutputs {
-        ToolOutputs(rootPath: rootPath, tool: tool)
+    /// Returns agent-specific output paths derived from the project root.
+    /// - Parameter agent: The agent variant to generate.
+    public func outputs(for agent: Agent) -> AgentOutputs {
+        AgentOutputs(rootPath: rootPath, agent: agent)
     }
 }
 
 extension AgentAdapterDirectory {
-    /// Tool-specific output paths derived from an AgentAdapter project root.
-    public struct ToolOutputs: Sendable {
+    /// Agent-specific output paths derived from an AgentAdapter project root.
+    public struct AgentOutputs: Sendable {
         /// The root URL of the AgentAdapter project.
         public let rootPath: URL
 
-        /// The tool variant used for output paths.
-        public let tool: Tool
+        /// The agent variant used for output paths.
+        public let agent: Agent
 
         /// The output path for the generated guidelines file (e.g. `AGENTS.md`).
         public var guidelinesFilePath: URL {
-            rootPath.appendingPathComponent(tool.guidelinesFile)
+            rootPath.appendingPathComponent(agent.guidelinesFile)
         }
 
         /// The output path for generated skills, if applicable.
         public var skillsDirectoryPath: URL? {
-            tool.skillsDirectory.map { rootPath.appendingPathComponent($0) }
+            agent.skillsDirectory.map { rootPath.appendingPathComponent($0) }
         }
 
         /// The output path for generated agents, if applicable.
         public var agentsDirectoryPath: URL? {
-            tool.agentsDirectory.map { rootPath.appendingPathComponent($0) }
+            agent.agentsDirectory.map { rootPath.appendingPathComponent($0) }
         }
     }
 }

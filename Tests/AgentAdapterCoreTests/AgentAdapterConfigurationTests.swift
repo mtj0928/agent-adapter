@@ -3,13 +3,13 @@ import Testing
 @testable import AgentAdapterCore
 
 struct AgentAdapterConfigurationTests {
-    @Test func loadsCustomToolsFromYaml() throws {
+    @Test func loadsCustomAgentsFromYaml() throws {
         let rootPath = URL(fileURLWithPath: "/root")
         let fileSystem = InMemoryFileSystem()
         try fileSystem.createDirectory(at: rootPath, withIntermediateDirectories: true)
         try fileSystem.writeString(
             """
-            tools:
+            agents:
               - name: codex
                 guidelinesFile: CUSTOM.md
                 skillsDirectory: .custom/skills
@@ -18,13 +18,13 @@ struct AgentAdapterConfigurationTests {
                 skillsDirectory: .custom_agent/skills
                 agentsDirectory: .custom_agent/agents
             """,
-            to: rootPath.appendingPathComponent(".agent-adapter.yml"),
+            to: rootPath.appendingPathComponent("agent-adapter.yml"),
             atomically: true,
             encoding: .utf8
         )
 
         let config = try AgentAdapterConfiguration.load(from: rootPath, fileSystem: fileSystem)
-        let resolved = try #require(config?.resolvedTools())
+        let resolved = try #require(config?.resolvedAgents())
 
         #expect(resolved["claude"] != nil)
         let codex = try #require(resolved["codex"])

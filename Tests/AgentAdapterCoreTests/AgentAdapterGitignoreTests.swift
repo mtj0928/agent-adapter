@@ -2,8 +2,8 @@ import Testing
 @testable import AgentAdapterCore
 
 struct AgentAdapterGitignoreTests {
-    @Test func renderGroupsEntriesWithToolComments() {
-        let custom = Tool(
+    @Test func renderGroupsEntriesWithAgentComments() {
+        let custom = Agent(
             name: "custom",
             guidelinesFile: "CUSTOM.md",
             skillsDirectory: ".custom/skills",
@@ -25,9 +25,9 @@ struct AgentAdapterGitignoreTests {
         """)
     }
 
-    @Test func toolsForGitignoreUsesOnlyTargets() throws {
-        let config = AgentAdapterConfiguration(tools: [
-            Tool(
+    @Test func agentsForGitignoreUsesOnlyTargets() throws {
+        let config = AgentAdapterConfiguration(agents: [
+            Agent(
                 name: "custom",
                 guidelinesFile: "CUSTOM.md",
                 skillsDirectory: ".custom/skills",
@@ -35,27 +35,27 @@ struct AgentAdapterGitignoreTests {
             )
         ])
 
-        let tools = try AgentAdapterGitignore.toolsForGitignore(
-            targetToolNames: ["codex"],
+        let agents = try AgentAdapterGitignore.agentsForGitignore(
+            targetAgentNames: ["codex"],
             config: config
         )
 
-        #expect(tools.map(\.name) == ["codex"])
+        #expect(agents.map(\.name) == ["codex"])
     }
 
-    @Test func toolsForGitignoreReturnsEmptyForNoTargets() throws {
-        let tools = try AgentAdapterGitignore.toolsForGitignore(
-            targetToolNames: [],
+    @Test func agentsForGitignoreReturnsEmptyForNoTargets() throws {
+        let agents = try AgentAdapterGitignore.agentsForGitignore(
+            targetAgentNames: [],
             config: nil
         )
 
-        #expect(tools.isEmpty)
+        #expect(agents.isEmpty)
     }
 
-    @Test func toolsForGitignoreThrowsOnUnknownTargets() {
+    @Test func agentsForGitignoreThrowsOnUnknownTargets() {
         #expect(throws: AgentAdapterGitignore.AgentAdapterGitignoreError.self) {
-            try AgentAdapterGitignore.toolsForGitignore(
-                targetToolNames: ["missing"],
+            try AgentAdapterGitignore.agentsForGitignore(
+                targetAgentNames: ["missing"],
                 config: nil
             )
         }

@@ -1,6 +1,6 @@
-/// Supported tools for AgentAdapter generation.
-public struct Tool: Hashable, Sendable, Codable {
-    /// Tool name used for AGENT_ADAPTER block filtering (e.g. "codex").
+/// Supported agents for AgentAdapter generation.
+public struct Agent: Hashable, Sendable, Codable {
+    /// Agent name used for AGENT_ADAPTER block filtering (e.g. "codex").
     public let name: String
 
     /// Guidelines file name (e.g. "AGENTS.md").
@@ -25,25 +25,25 @@ public struct Tool: Hashable, Sendable, Codable {
     }
 }
 
-extension Tool {
-    /// Codex tool output (`AGENTS.md` and `.codex/`).
-    public static let codex = Tool(
+extension Agent {
+    /// Codex agent output (`AGENTS.md` and `.codex/`).
+    public static let codex = Agent(
         name: "codex",
         guidelinesFile: "AGENTS.md",
         skillsDirectory: ".codex/skills",
         agentsDirectory: nil
     )
 
-    /// Claude Code output (`CLAUDE.md` and `.claude/`).
-    public static let claude = Tool(
+    /// Claude Code agent output (`CLAUDE.md` and `.claude/`).
+    public static let claude = Agent(
         name: "claude",
         guidelinesFile: "CLAUDE.md",
         skillsDirectory: ".claude/skills",
         agentsDirectory: ".claude/agents"
     )
 
-    /// Default tools supported by AgentAdapter.
-    public static let defaults: [Tool] = [
+    /// Default agents supported by AgentAdapter.
+    public static let defaults: [Agent] = [
         .codex,
         .claude
     ]

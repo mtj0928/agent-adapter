@@ -1,25 +1,25 @@
 # agent-adapter
 
-agent-adapter is a CLI tool that unifies documentation management across different AI coding agent tools (Claude Code, Codex, etc.). It allows you to maintain a single source of truth (`AGENT_GUIDELINES.md`) and automatically syncs tool-specific documentation and configurations.
+agent-adapter is a CLI tool that unifies documentation management across different AI coding agents (Claude Code, Codex, etc.). It allows you to maintain a single source of truth (`AGENT_GUIDELINES.md`) and automatically generates agent-specific documentation and configurations.
 
 ## Why agent-adapter?
 
-Different AI coding agent tools use different documentation formats:
+Different AI coding agents use different documentation formats:
 - **Claude Code**: Uses `CLAUDE.md` for project guidance, supports skills and agents
 - **Codex**: Uses `AGENTS.md` for agent guidance, supports skills only
 
-When using multiple tools on the same project, you end up duplicating content across multiple files. agent-adapter solves this by letting you write once and sync for all tools.
+When using multiple agents on the same project, you end up duplicating content across multiple files. agent-adapter solves this by letting you write once and generate for all agents.
 
 ## How It Works
 
 ### 1. Single Source of Truth: AGENT_GUIDELINES.md
 
-Write your project documentation in `AGENT_GUIDELINES.md` at your project root. Use conditional blocks to specify tool-specific content:
+Write your project documentation in `AGENT_GUIDELINES.md` at your project root. Use conditional blocks to specify agent-specific content:
 
 ```markdown
 # My Project
 
-This content appears in all synced files.
+This content appears in all generated files.
 
 <!-- AGENT_ADAPTER:codex -->
 This content only appears in AGENTS.md (Codex)
@@ -31,18 +31,18 @@ This content only appears in CLAUDE.md (Claude Code)
 ```
 
 **Syntax Rules**:
-- `<!-- AGENT_ADAPTER:{TOOL} -->` starts a tool-specific block
-- `<!-- AGENT_ADAPTER -->` ends a tool-specific block
-- `{TOOL}` can be `codex`, `claude`, or any custom tool name defined in `.agent-adapter.yml`
-- Content outside blocks appears in all synced files
-- Tool-specific blocks only appear in their respective outputs
+- `<!-- AGENT_ADAPTER:{AGENT} -->` starts an agent-specific block
+- `<!-- AGENT_ADAPTER -->` ends an agent-specific block
+- `{AGENT}` can be `codex`, `claude`, or any custom agent name defined in `agent-adapter.yml`
+- Content outside blocks appears in all generated files
+- Agent-specific blocks only appear in their respective outputs
 
 ### 2. Skills and Agents Auto-Expansion
 
-Place your skills and agents in `agent-adapter/` directory. agent-adapter automatically expands them to the appropriate locations:
+Place your skills and agents in `.agent-adapter/` directory. agent-adapter automatically expands them to the appropriate locations:
 
 ```
-agent-adapter/
+.agent-adapter/
 ├── skills/
 │   ├── MySkill/
 │   │   ├── SKILL.md
@@ -56,35 +56,35 @@ agent-adapter/
 ```
 
 **Expansion Rules**:
-- `agent-adapter/skills/MySkill/` → `.codex/skills/MySkill/` (for Codex)
-- `agent-adapter/skills/MySkill/` → `.claude/skills/MySkill/` (for Claude Code)
-- `agent-adapter/agents/MyAgent/` → `.claude/agents/MyAgent/` (Claude Code only)
+- `.agent-adapter/skills/MySkill/` → `.codex/skills/MySkill/` (for Codex)
+- `.agent-adapter/skills/MySkill/` → `.claude/skills/MySkill/` (for Claude Code)
+- `.agent-adapter/agents/MyAgent/` → `.claude/agents/MyAgent/` (Claude Code only)
 
-All files within skill/agent directories are copied, preserving the directory structure. You can also use `<!-- AGENT_ADAPTER:{TOOL} -->` syntax inside these files.
+All files within skill/agent directories are copied, preserving the directory structure. You can also use `<!-- AGENT_ADAPTER:{AGENT} -->` syntax inside these files.
 
 **Note**: Agents are Claude Code-specific, so they're only expanded for Claude Code, not Codex.
 
 ## CLI Usage
 
 ```bash
-# Sync config for Codex
-$ agent-adapter sync-config codex
+# Generate config for Codex
+$ agent-adapter generate-config codex
 
-# Sync config for Claude Code
-$ agent-adapter sync-config claude
+# Generate config for Claude Code
+$ agent-adapter generate-config claude
 
-# Sync config for a custom tool from .agent-adapter.yml
-$ agent-adapter sync-config custom_agent
+# Generate config for a custom agent from agent-adapter.yml
+$ agent-adapter generate-config custom_agent
 
-# Output gitignore entries for specific tools
+# Output gitignore entries for specific agents
 $ agent-adapter generate-gitignore codex claude
 ```
 
-### Custom Tools via .agent-adapter.yml
-Define or override tools in `.agent-adapter.yml`. When a tool name matches a default, it overrides the defaults.
+### Custom Agents via agent-adapter.yml
+Define or override agents in `agent-adapter.yml`. When an agent name matches a default, it overrides the defaults.
 
 ```yaml
-tools:
+agents:
   - name: codex
     guidelinesFile: CUSTOM.md
     skillsDirectory: .custom/skills
@@ -95,21 +95,21 @@ tools:
 ```
 
 Fields:
-- `name`: Tool name used on the CLI and in `<!-- AGENT_ADAPTER:{TOOL} -->` blocks
+- `name`: Agent name used on the CLI and in `<!-- AGENT_ADAPTER:{AGENT} -->` blocks
 - `guidelinesFile`: Synced file name
 - `skillsDirectory`: Destination for expanded skills (optional)
 - `agentsDirectory`: Destination for expanded agents (optional)
 
 ### Synced Files
 
-**For Codex** (`agent-adapter codex`):
+**For Codex** (`agent-adapter generate-config codex`):
 - `AGENTS.md` (from AGENT_GUIDELINES.md, with codex-specific blocks)
-- `.codex/skills/` (expanded from `agent-adapter/skills/`)
+- `.codex/skills/` (expanded from `.agent-adapter/skills/`)
 
-**For Claude Code** (`agent-adapter claude`):
+**For Claude Code** (`agent-adapter generate-config claude`):
 - `CLAUDE.md` (from AGENT_GUIDELINES.md, with claude-specific blocks)
-- `.claude/skills/` (expanded from `agent-adapter/skills/`)
-- `.claude/agents/` (expanded from `agent-adapter/agents/`)
+- `.claude/skills/` (expanded from `.agent-adapter/skills/`)
+- `.claude/agents/` (expanded from `.agent-adapter/agents/`)
 
 ## Example
 
@@ -145,7 +145,7 @@ my-project/
 ├── AGENT_GUIDELINES.md                   # Your source of truth
 ├── CLAUDE.md                   # Synced - don't edit directly
 ├── AGENTS.md                   # Synced - don't edit directly
-├── agent-adapter/
+├── .agent-adapter/
 │   ├── skills/
 │   │   └── test/
 │   │       └── SKILL.md
@@ -186,4 +186,4 @@ swift test
 
 ---
 
-**Important**: Always edit `AGENT_GUIDELINES.md` and files in `agent-adapter/`, not the synced files. Run `agent-adapter` again after making changes to resync the outputs.
+**Important**: Always edit `AGENT_GUIDELINES.md` and files in `.agent-adapter/`, not the generated files. Run `agent-adapter` again after making changes to regenerate the outputs.
