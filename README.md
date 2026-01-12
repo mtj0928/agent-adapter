@@ -4,7 +4,7 @@ Write once in `AGENT_GUIDELINES.md`, then sync not only the tool-specific guidan
 
 ## How It Works
 - **Copy from a single source**: `AGENT_GUIDELINES.md` is the canonical document. agent-adapter reads it and syncs tool-specific files such as `AGENTS.md` and `CLAUDE.md`.
-- **Skills and agents are synced too**: Place reusable skills and (for Claude) agents in `agent-adapter/`. They are expanded into `.codex/` and `.claude/` as needed, preserving directory structure so the full skill/agent sets stay in sync.
+- **Skills and agents are synced too**: Place reusable skills and (for Claude) agents in `.agent-adapter/`. They are expanded into `.codex/` and `.claude/` as needed, preserving directory structure so the full skill/agent sets stay in sync.
 - **Use the CLI**: Run the generator for each target tool, including any custom tools from `.agent-adapter.yml`.
 
 ```bash

@@ -21,17 +21,17 @@ public struct AgentAdapterDirectory: Sendable {
         rootPath.appendingPathComponent(AgentAdapterConfiguration.fileName)
     }
 
-    /// The path to the `agent-adapter` source directory.
+    /// The path to the `.agent-adapter` source directory.
     public var agentAdapterRootPath: URL {
-        rootPath.appendingPathComponent("agent-adapter")
+        rootPath.appendingPathComponent(".agent-adapter")
     }
 
-    /// The path to the `agent-adapter/skills` source directory.
+    /// The path to the `.agent-adapter/skills` source directory.
     public var agentAdapterSkillsPath: URL {
         agentAdapterRootPath.appendingPathComponent("skills")
     }
 
-    /// The path to the `agent-adapter/agents` source directory.
+    /// The path to the `.agent-adapter/agents` source directory.
     public var agentAdapterAgentsPath: URL {
         agentAdapterRootPath.appendingPathComponent("agents")
     }

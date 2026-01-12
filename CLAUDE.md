@@ -39,10 +39,10 @@ This content only appears in CLAUDE.md (Claude Code)
 
 ### 2. Skills and Agents Auto-Expansion
 
-Place your skills and agents in `agent-adapter/` directory. agent-adapter automatically expands them to the appropriate locations:
+Place your skills and agents in `.agent-adapter/` directory. agent-adapter automatically expands them to the appropriate locations:
 
 ```
-agent-adapter/
+.agent-adapter/
 ├── skills/
 │   ├── MySkill/
 │   │   ├── SKILL.md
@@ -56,9 +56,9 @@ agent-adapter/
 ```
 
 **Expansion Rules**:
-- `agent-adapter/skills/MySkill/` → `.codex/skills/MySkill/` (for Codex)
-- `agent-adapter/skills/MySkill/` → `.claude/skills/MySkill/` (for Claude Code)
-- `agent-adapter/agents/MyAgent/` → `.claude/agents/MyAgent/` (Claude Code only)
+- `.agent-adapter/skills/MySkill/` → `.codex/skills/MySkill/` (for Codex)
+- `.agent-adapter/skills/MySkill/` → `.claude/skills/MySkill/` (for Claude Code)
+- `.agent-adapter/agents/MyAgent/` → `.claude/agents/MyAgent/` (Claude Code only)
 
 All files within skill/agent directories are copied, preserving the directory structure. You can also use `<!-- AGENT_ADAPTER:{TOOL} -->` syntax inside these files.
 
@@ -104,12 +104,12 @@ Fields:
 
 **For Codex** (`agent-adapter codex`):
 - `AGENTS.md` (from AGENT_GUIDELINES.md, with codex-specific blocks)
-- `.codex/skills/` (expanded from `agent-adapter/skills/`)
+- `.codex/skills/` (expanded from `.agent-adapter/skills/`)
 
 **For Claude Code** (`agent-adapter claude`):
 - `CLAUDE.md` (from AGENT_GUIDELINES.md, with claude-specific blocks)
-- `.claude/skills/` (expanded from `agent-adapter/skills/`)
-- `.claude/agents/` (expanded from `agent-adapter/agents/`)
+- `.claude/skills/` (expanded from `.agent-adapter/skills/`)
+- `.claude/agents/` (expanded from `.agent-adapter/agents/`)
 
 ## Example
 
@@ -145,7 +145,7 @@ my-project/
 ├── AGENT_GUIDELINES.md                   # Your source of truth
 ├── CLAUDE.md                   # Synced - don't edit directly
 ├── AGENTS.md                   # Synced - don't edit directly
-├── agent-adapter/
+├── .agent-adapter/
 │   ├── skills/
 │   │   └── test/
 │   │       └── SKILL.md
@@ -186,4 +186,4 @@ swift test
 
 ---
 
-**Important**: Always edit `AGENT_GUIDELINES.md` and files in `agent-adapter/`, not the synced files. Run `agent-adapter` again after making changes to resync the outputs.
+**Important**: Always edit `AGENT_GUIDELINES.md` and files in `.agent-adapter/`, not the synced files. Run `agent-adapter` again after making changes to resync the outputs.

@@ -22,7 +22,7 @@ struct AgentAdapterGeneratorTests {
         )
 
         try fileSystem.writeFile(
-            path: rootPath.appendingPathComponent("agent-adapter/skills/test/SKILL.md"),
+            path: rootPath.appendingPathComponent(".agent-adapter/skills/test/SKILL.md"),
             contents: """
             Skill Shared
             <!-- AGENT_ADAPTER:codex -->
@@ -81,11 +81,11 @@ struct AgentAdapterGeneratorTests {
         )
 
         try fileSystem.writeFile(
-            path: rootPath.appendingPathComponent("agent-adapter/skills/test/SKILL.md"),
+            path: rootPath.appendingPathComponent(".agent-adapter/skills/test/SKILL.md"),
             contents: "Skill Shared"
         )
         try fileSystem.writeFile(
-            path: rootPath.appendingPathComponent("agent-adapter/agents/reviewer/AGENT.md"),
+            path: rootPath.appendingPathComponent(".agent-adapter/agents/reviewer/AGENT.md"),
             contents: "Agent Shared"
         )
 
