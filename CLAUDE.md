@@ -179,7 +179,7 @@ swift test
 ## Workflow
 - [ ] Edit file
 - [ ] Add or update DocC based on the added or changed logic.
-- [ ] Run tests
+- [ ] Run tests every time
 
 ---
 
