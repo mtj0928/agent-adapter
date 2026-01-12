@@ -2,43 +2,6 @@
 A CLI tool for managing agent documentation from a single source. 
 Write once in `AGENT_GUIDELINES.md`, then sync the right files for each tool so your guidance stays consistent and up to date.
 
-## Install
-### Homebrew
-The easiest way is to use Homebrew.
-
-```bash
-brew tap mtj0928/agent-adapter
-brew install agent-adapter
-```
-
-### Binary Install 
-You can also install via the GitHub Releases binaries (macOS / Linux).
-
-```bash
-# macOS (universal)
-curl -L https://github.com/mtj0928/agent-adapter/releases/latest/download/agent-adapter-macos-universal.tar.gz | tar -xz
-
-# Linux (x86_64)
-curl -L https://github.com/mtj0928/agent-adapter/releases/latest/download/agent-adapter-linux-x86_64.tar.gz | tar -xz
-```
-
-### nest 
-On macOS, you can also install via [nest](https://github.com/mtj0928/nest), or build the Swift package.
-
-```bash
-nest install mtj0928/agent-adapter
-```
-
-Build from source (move the built binary to a location on your PATH):
-
-```bash
-swift build -c release
-cp .build/release/agent-adapter /usr/local/bin/
-```
-
-## Supported Agents
-agent-adapter currently supports Codex and Claude Code. You can also define custom tools in `.agent-adapter.yml`.
-
 ## How It Works
 - **Copy from a single source**: `AGENT_GUIDELINES.md` is the canonical document. agent-adapter reads it and syncs tool-specific files such as `AGENTS.md` and `CLAUDE.md`.
 - **Skills and agents**: Place reusable skills and (for Claude) agents in `agent-adapter/`. They are expanded into `.codex/` and `.claude/` as needed, preserving directory structure.
@@ -57,6 +20,9 @@ agent-adapter sync-config custom_agent
 # Sync multiple tools at once
 agent-adapter sync-config claude codex
 ```
+
+## Supported Agents
+agent-adapter currently supports Codex and Claude Code. You can also define custom tools in `.agent-adapter.yml`.
 
 ### AGENT_GUIDELINES.md Syntax
 `AGENT_GUIDELINES.md` supports simple conditional blocks so you can include tool-specific content without duplicating the whole file.
@@ -103,3 +69,37 @@ Fields:
 ```bash
 agent-adapter generate-gitignore codex claude >> .gitignore
 ```
+
+## Install
+### Homebrew
+The easiest way is to use Homebrew.
+
+```bash
+brew tap mtj0928/agent-adapter
+brew install agent-adapter
+```
+
+### Binary Install 
+You can also install via the GitHub Releases binaries (macOS / Linux).
+
+```bash
+# macOS (universal)
+curl -L https://github.com/mtj0928/agent-adapter/releases/latest/download/agent-adapter-macos-universal.tar.gz | tar -xz
+
+# Linux (x86_64)
+curl -L https://github.com/mtj0928/agent-adapter/releases/latest/download/agent-adapter-linux-x86_64.tar.gz | tar -xz
+```
+
+### nest 
+On macOS, you can also install via [nest](https://github.com/mtj0928/nest), or build the Swift package.
+
+```bash
+nest install mtj0928/agent-adapter
+```
+
+### Build from source (move the built binary to a location on your PATH):
+```bash
+swift build -c release
+cp .build/release/agent-adapter /usr/local/bin/
+```
+
