@@ -7,7 +7,10 @@ Write once in `AGENT_GUIDELINES.md`, then generate not only the agent-specific g
 - **Skills and agents are generated too**: Place reusable skills and (for Claude) agents in `.agent-adapter/`. They are expanded into `.codex/` and `.claude/` as needed, preserving directory structure so the full skill/agent sets stay aligned.
 - **Use the CLI**: Run the generator for each target agent, including any custom agents from `agent-adapter.yml`.
 
-## Usages
+## Generate Configurations
+agent-adapter can generate configurations for specific agents from `AGENT_GUIDELINES.md`.
+
+### Usages
 ```bash
 # Generate `AGENTS.md` and `.codex/skills` for Codex
 agent-adapter generate-config codex
@@ -25,9 +28,7 @@ agent-adapter generate-config custom_agent
 agent-adapter generate-config claude codex gemini
 ```
 
-## Generate Configurations
-agent-adapter can generate configurations for specific agents.
-
+### Source Files
 The followings are the original files and agent-adapter can generate configurations for a specific agent.
 
 - AGENT_GUIDELINES.md: A guideline for coding agents. This will be copied as an instruction file such as `AGENTS.md` and `CLAUDE.md`
@@ -50,6 +51,39 @@ This is a basic directory structure.
         └── <AgentName>/
             └── AGENT.md
 ```
+
+### Generated Outputs (by agent)
+See exactly what files and directories are generated for each agent and which source they come from.
+
+<details>
+<summary>Codex</summary>
+
+| Output | Source |
+| --- | --- |
+| `AGENTS.md` | `AGENT_GUIDELINES.md` |
+| `.codex/skills/` | `.agent-adapter/skills/` |
+
+</details>
+
+<details>
+<summary>Claude Code</summary>
+
+| Output | Source |
+| --- | --- |
+| `CLAUDE.md` | `AGENT_GUIDELINES.md` |
+| `.claude/skills/` | `.agent-adapter/skills/` |
+| `.claude/agents/` | `.agent-adapter/agents/` |
+
+</details>
+
+<details>
+<summary>Gemini CLI</summary>
+
+| Output | Source |
+| --- | --- |
+| `GEMINI.md` | `AGENT_GUIDELINES.md` |
+
+</details>
 
 ### Conditional Blocks
 agent-adapter supports simple conditional blocks so you can include agent-specific content without duplicating the whole file.
