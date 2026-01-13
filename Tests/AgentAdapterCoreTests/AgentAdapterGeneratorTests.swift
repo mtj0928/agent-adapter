@@ -63,6 +63,52 @@ struct AgentAdapterGeneratorTests {
         ))
     }
 
+    @Test func generatesGeminiOutputs() throws {
+        let rootPath = URL(fileURLWithPath: "/root")
+        let fileSystem = InMemoryFileSystem()
+        try fileSystem.createDirectory(at: rootPath, withIntermediateDirectories: true)
+        try fileSystem.writeFile(
+            path: rootPath.appendingPathComponent("AGENT_GUIDELINES.md"),
+            contents: """
+            Shared
+            <!-- AGENT_ADAPTER:codex -->
+            Codex Only
+            <!-- AGENT_ADAPTER -->
+            <!-- AGENT_ADAPTER:claude -->
+            Claude Only
+            <!-- AGENT_ADAPTER -->
+            <!-- AGENT_ADAPTER:gemini -->
+            Gemini Only
+            <!-- AGENT_ADAPTER -->
+            """
+        )
+
+        try fileSystem.writeFile(
+            path: rootPath.appendingPathComponent(".agent-adapter/skills/test/SKILL.md"),
+            contents: "Skill Shared"
+        )
+
+        let generator = AgentAdapterGenerator(fileSystem: fileSystem)
+        try generator.generate(in: rootPath, agent: .gemini)
+
+        let gemini = try fileSystem.readString(
+            at: rootPath.appendingPathComponent("GEMINI.md"),
+            encoding: .utf8
+        )
+        let expectedGemini = """
+        Shared
+        Gemini Only
+        """
+        #expect(gemini == expectedGemini)
+
+        #expect(!fileSystem.fileExists(
+            atPath: rootPath.appendingPathComponent(".codex").path
+        ))
+        #expect(!fileSystem.fileExists(
+            atPath: rootPath.appendingPathComponent(".claude").path
+        ))
+    }
+
     @Test func generatesClaudeOutputs() throws {
         let rootPath = URL(fileURLWithPath: "/root")
         let fileSystem = InMemoryFileSystem()

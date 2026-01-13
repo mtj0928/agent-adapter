@@ -42,9 +42,18 @@ extension Agent {
         agentsDirectory: ".claude/agents"
     )
 
+    /// Gemini CLI agent output (`GEMINI.md`).
+    public static let gemini = Agent(
+        name: "gemini",
+        guidelinesFile: "GEMINI.md",
+        skillsDirectory: nil,
+        agentsDirectory: nil
+    )
+
     /// Default agents supported by AgentAdapter.
     public static let defaults: [Agent] = [
         .codex,
-        .claude
+        .claude,
+        .gemini
     ]
 }

@@ -3,7 +3,7 @@ A CLI tool for managing agent documentation from a single source.
 Write once in `AGENT_GUIDELINES.md`, then generate not only the agent-specific guidance files but also the skills and agents directories so everything stays consistent and up to date.
 
 ## How It Works
-- **Copy from a single source**: `AGENT_GUIDELINES.md` is the canonical document. agent-adapter reads it and generates agent-specific files such as `AGENTS.md` and `CLAUDE.md`.
+- **Copy from a single source**: `AGENT_GUIDELINES.md` is the canonical document. agent-adapter reads it and generates agent-specific files such as `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`.
 - **Skills and agents are generated too**: Place reusable skills and (for Claude) agents in `.agent-adapter/`. They are expanded into `.codex/` and `.claude/` as needed, preserving directory structure so the full skill/agent sets stay aligned.
 - **Use the CLI**: Run the generator for each target agent, including any custom agents from `agent-adapter.yml`.
 
@@ -15,11 +15,14 @@ agent-adapter generate-config codex
 # Generate `CLAUDE.md` and `.claude/skills` and `.claude/agents` from Claude Code.
 agent-adapter generate-config claude
 
+# Generate `GEMINI.md` for Gemini CLI.
+agent-adapter generate-config gemini
+
 # Generate a custom agent from agent-adapter.yml
 agent-adapter generate-config custom_agent
 
 # Generate multiple agents at once
-agent-adapter generate-config claude codex
+agent-adapter generate-config claude codex gemini
 ```
 
 ## Generate Configurations
@@ -51,7 +54,7 @@ This is a basic directory structure.
 ### Conditional Blocks
 agent-adapter supports simple conditional blocks so you can include agent-specific content without duplicating the whole file.
 
-Use `<!-- AGENT_ADAPTER:{AGENT} -->` to start a block (`codex`, `claude`, or any custom agent name) and `<!-- AGENT_ADAPTER -->` to end it. Content outside the blocks is shared across all outputs.
+Use `<!-- AGENT_ADAPTER:{AGENT} -->` to start a block (`codex`, `claude`, `gemini`, or any custom agent name) and `<!-- AGENT_ADAPTER -->` to end it. Content outside the blocks is shared across all outputs.
 
 This is an example of AGENT_GUIDELINES.md.
 ```markdown
@@ -66,13 +69,17 @@ This text appears only in AGENTS.md.
 <!-- AGENT_ADAPTER:claude -->
 This text appears only in CLAUDE.md.
 <!-- AGENT_ADAPTER -->
+
+<!-- AGENT_ADAPTER:gemini -->
+This text appears only in GEMINI.md.
+<!-- AGENT_ADAPTER -->
 ```
 
 agent-adapter supports this syntax on not only AGENT_GUIDELINES.md, but also all files.
 So, you can use this syntax on skills and agents.
 
 ### Custom Agents
-agent-adapter supports only Codex and Claude Code for now, but you can define or override agents in `agent-adapter.yml`.
+agent-adapter supports Codex, Claude Code, and Gemini CLI by default, but you can define or override agents in `agent-adapter.yml`.
 
 ```yaml
 agents:
@@ -95,7 +102,7 @@ Each element of `agents` can have the following properties.
 `generate-gitignore` prints gitignore entries for the agents you specify. Copy and paste the snippet below to append them to your `.gitignore`:
 
 ```bash
-agent-adapter generate-gitignore codex claude >> .gitignore
+agent-adapter generate-gitignore codex claude gemini >> .gitignore
 ```
 
 ## Install

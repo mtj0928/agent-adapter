@@ -26,5 +26,10 @@ struct AgentAdapterDirectoryTests {
         #expect(claudeOutputs.guidelinesFilePath == rootPath.appendingPathComponent("CLAUDE.md"))
         #expect(claudeOutputs.skillsDirectoryPath == rootPath.appendingPathComponent(".claude/skills"))
         #expect(claudeOutputs.agentsDirectoryPath == rootPath.appendingPathComponent(".claude/agents"))
+
+        let geminiOutputs = directory.outputs(for: .gemini)
+        #expect(geminiOutputs.guidelinesFilePath == rootPath.appendingPathComponent("GEMINI.md"))
+        #expect(geminiOutputs.skillsDirectoryPath == nil)
+        #expect(geminiOutputs.agentsDirectoryPath == nil)
     }
 }
