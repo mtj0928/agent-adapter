@@ -84,6 +84,10 @@ $ agent-adapter generate-config gemini
 # Generate config for a custom agent from agent-adapter.yml
 $ agent-adapter generate-config custom_agent
 
+# Generate into global (home directory) locations
+# e.g., ~/.claude/, ~/.codex/, ~/.gemini/
+$ agent-adapter generate-config --global claude codex gemini
+
 # Output gitignore entries for specific agents
 $ agent-adapter generate-gitignore codex claude gemini
 ```
@@ -107,6 +111,9 @@ Fields:
 - `guidelinesFile`: Synced file name
 - `skillsDirectory`: Destination for expanded skills (optional)
 - `agentsDirectory`: Destination for expanded agents (optional)
+- `globalGuidelinesFile`: Global guidelines file path, e.g. `~/.claude/CLAUDE.md` (optional)
+- `globalSkillsDirectory`: Global skills directory path, e.g. `~/.claude/skills` (optional)
+- `globalAgentsDirectory`: Global agents directory path, e.g. `~/.claude/agents` (optional)
 
 ### Synced Files
 

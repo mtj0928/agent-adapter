@@ -17,6 +17,9 @@ struct AgentAdapter: AsyncParsableCommand {
         @Argument(help: "Target agents to generate config for (codex, claude, gemini, or custom from agent-adapter.yml).")
         var targets: [String] = []
 
+        @Flag(name: .long, help: "Generate config into the global (home directory) location instead of the project root.")
+        var global: Bool = false
+
         mutating func run() async throws {
             let fileSystem = FileManager.default
             let generator = AgentAdapterGenerator()
@@ -45,8 +48,15 @@ struct AgentAdapter: AsyncParsableCommand {
                 throw ValidationError("Unknown agent(s) '\(unknown)'. Available agents: \(available)")
             }
 
-            for agent in agents {
-                try generator.generate(in: rootPath, agent: agent)
+            if global {
+                let homeDirectory = fileSystem.homeDirectoryForCurrentUser
+                for agent in agents {
+                    try generator.generateGlobal(in: rootPath, agent: agent, homeDirectory: homeDirectory)
+                }
+            } else {
+                for agent in agents {
+                    try generator.generate(in: rootPath, agent: agent)
+                }
             }
         }
     }

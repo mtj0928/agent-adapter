@@ -12,16 +12,34 @@ public struct Agent: Hashable, Sendable, Codable {
     /// Destination directory for expanded agents.
     public let agentsDirectory: String?
 
+    /// Global guidelines file path (e.g. "~/.claude/CLAUDE.md").
+    /// If nil, no global guidelines file is generated.
+    public let globalGuidelinesFile: String?
+
+    /// Global skills directory path (e.g. "~/.claude/skills").
+    /// If nil, no global skills are generated.
+    public let globalSkillsDirectory: String?
+
+    /// Global agents directory path (e.g. "~/.claude/agents").
+    /// If nil, no global agents are generated.
+    public let globalAgentsDirectory: String?
+
     public init(
         name: String,
         guidelinesFile: String,
         skillsDirectory: String?,
-        agentsDirectory: String?
+        agentsDirectory: String?,
+        globalGuidelinesFile: String? = nil,
+        globalSkillsDirectory: String? = nil,
+        globalAgentsDirectory: String? = nil
     ) {
         self.name = name
         self.guidelinesFile = guidelinesFile
         self.skillsDirectory = skillsDirectory
         self.agentsDirectory = agentsDirectory
+        self.globalGuidelinesFile = globalGuidelinesFile
+        self.globalSkillsDirectory = globalSkillsDirectory
+        self.globalAgentsDirectory = globalAgentsDirectory
     }
 }
 
@@ -31,7 +49,10 @@ extension Agent {
         name: "codex",
         guidelinesFile: "AGENTS.md",
         skillsDirectory: ".codex/skills",
-        agentsDirectory: nil
+        agentsDirectory: nil,
+        globalGuidelinesFile: "~/.codex/AGENTS.md",
+        globalSkillsDirectory: "~/.codex/skills",
+        globalAgentsDirectory: nil
     )
 
     /// Claude Code agent output (`CLAUDE.md` and `.claude/`).
@@ -39,7 +60,10 @@ extension Agent {
         name: "claude",
         guidelinesFile: "CLAUDE.md",
         skillsDirectory: ".claude/skills",
-        agentsDirectory: ".claude/agents"
+        agentsDirectory: ".claude/agents",
+        globalGuidelinesFile: "~/.claude/CLAUDE.md",
+        globalSkillsDirectory: "~/.claude/skills",
+        globalAgentsDirectory: "~/.claude/agents"
     )
 
     /// Gemini CLI agent output (`GEMINI.md`).
@@ -47,7 +71,10 @@ extension Agent {
         name: "gemini",
         guidelinesFile: "GEMINI.md",
         skillsDirectory: nil,
-        agentsDirectory: nil
+        agentsDirectory: nil,
+        globalGuidelinesFile: "~/.gemini/GEMINI.md",
+        globalSkillsDirectory: nil,
+        globalAgentsDirectory: nil
     )
 
     /// Default agents supported by AgentAdapter.
