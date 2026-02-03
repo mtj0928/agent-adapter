@@ -26,6 +26,10 @@ agent-adapter generate-config custom_agent
 
 # Generate multiple agents at once
 agent-adapter generate-config claude codex gemini
+
+# Generate into global (home directory) locations
+# e.g., ~/.claude/, ~/.codex/, ~/.gemini/
+agent-adapter generate-config --global claude codex gemini
 ```
 
 ### Source Files
@@ -84,6 +88,18 @@ See exactly what files and directories are generated for each agent and which so
 | `GEMINI.md` | `AGENT_GUIDELINES.md` |
 
 </details>
+
+### Global Output (`--global`)
+By default, `generate-config` writes files into the current project directory. Pass `--global` to write them into the agent's home-directory location instead.
+
+| Agent | Global output |
+| --- | --- |
+| Claude Code | `~/.claude/CLAUDE.md`, `~/.claude/skills/`, `~/.claude/agents/` |
+| Codex | `~/.codex/AGENTS.md`, `~/.codex/skills/` |
+| Gemini CLI | `~/.gemini/GEMINI.md` |
+| Custom | `~/.<name>/<guidelinesFile>`, `~/.<name>/skills/`, `~/.<name>/agents/` |
+
+Sources are still read from the project's `AGENT_GUIDELINES.md` and `.agent-adapter/` directory.
 
 ### Conditional Blocks
 agent-adapter supports simple conditional blocks so you can include agent-specific content without duplicating the whole file.
