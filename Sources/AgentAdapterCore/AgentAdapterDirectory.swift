@@ -65,12 +65,14 @@ extension AgentAdapterDirectory {
             self.agentsDirectoryPath = agent.agentsDirectory.map { rootPath.appendingPathComponent($0) }
         }
 
-        /// Creates global agent outputs rooted at the home directory.
+        /// Creates global agent outputs using the agent's global path configuration.
         ///
-        /// The global root directory is `~/.<agent-name>/`. For example:
-        /// - Claude: `~/.claude/CLAUDE.md`, `~/.claude/skills/`, `~/.claude/agents/`
-        /// - Codex: `~/.codex/AGENTS.md`, `~/.codex/skills/`
-        /// - Gemini: `~/.gemini/GEMINI.md`
+        /// Uses the agent's `globalGuidelinesFile`, `globalSkillsDirectory`, and
+        /// `globalAgentsDirectory` properties. If these are nil, falls back to
+        /// `~/.<agent-name>/<guidelinesFile>`, `~/.<agent-name>/skills`, and
+        /// `~/.<agent-name>/agents` respectively.
+        ///
+        /// Paths starting with `~/` are expanded relative to `homeDirectory`.
         ///
         /// - Parameters:
         ///   - agent: The agent variant to generate.
@@ -78,13 +80,45 @@ extension AgentAdapterDirectory {
         /// - Returns: An ``AgentOutputs`` with global paths.
         public static func global(agent: Agent, homeDirectory: URL) -> AgentOutputs {
             let globalRoot = homeDirectory.appendingPathComponent(".\(agent.name)")
+
+            let guidelinesPath: URL
+            if let globalGuidelinesFile = agent.globalGuidelinesFile {
+                guidelinesPath = expandTilde(globalGuidelinesFile, homeDirectory: homeDirectory)
+            } else {
+                guidelinesPath = globalRoot.appendingPathComponent(agent.guidelinesFile)
+            }
+
+            let skillsPath: URL?
+            if let globalSkillsDirectory = agent.globalSkillsDirectory {
+                skillsPath = expandTilde(globalSkillsDirectory, homeDirectory: homeDirectory)
+            } else if agent.skillsDirectory != nil {
+                skillsPath = globalRoot.appendingPathComponent("skills")
+            } else {
+                skillsPath = nil
+            }
+
+            let agentsPath: URL?
+            if let globalAgentsDirectory = agent.globalAgentsDirectory {
+                agentsPath = expandTilde(globalAgentsDirectory, homeDirectory: homeDirectory)
+            } else if agent.agentsDirectory != nil {
+                agentsPath = globalRoot.appendingPathComponent("agents")
+            } else {
+                agentsPath = nil
+            }
+
             return AgentOutputs(
-                guidelinesFilePath: globalRoot.appendingPathComponent(agent.guidelinesFile),
-                skillsDirectoryPath: agent.skillsDirectory != nil
-                    ? globalRoot.appendingPathComponent("skills") : nil,
-                agentsDirectoryPath: agent.agentsDirectory != nil
-                    ? globalRoot.appendingPathComponent("agents") : nil
+                guidelinesFilePath: guidelinesPath,
+                skillsDirectoryPath: skillsPath,
+                agentsDirectoryPath: agentsPath
             )
+        }
+
+        private static func expandTilde(_ path: String, homeDirectory: URL) -> URL {
+            if path.hasPrefix("~/") {
+                let relativePath = String(path.dropFirst(2))
+                return homeDirectory.appendingPathComponent(relativePath)
+            }
+            return URL(fileURLWithPath: path)
         }
 
         private init(guidelinesFilePath: URL, skillsDirectoryPath: URL?, agentsDirectoryPath: URL?) {

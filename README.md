@@ -97,9 +97,19 @@ By default, `generate-config` writes files into the current project directory. P
 | Claude Code | `~/.claude/CLAUDE.md`, `~/.claude/skills/`, `~/.claude/agents/` |
 | Codex | `~/.codex/AGENTS.md`, `~/.codex/skills/` |
 | Gemini CLI | `~/.gemini/GEMINI.md` |
-| Custom | `~/.<name>/<guidelinesFile>`, `~/.<name>/skills/`, `~/.<name>/agents/` |
+| Custom | Uses `globalGuidelinesFile`, `globalSkillsDirectory`, `globalAgentsDirectory` from config |
 
 Sources are still read from the project's `AGENT_GUIDELINES.md` and `.agent-adapter/` directory.
+
+For custom agents, you can specify explicit global paths in `agent-adapter.yml`:
+```yaml
+agents:
+  - name: custom_agent
+    guidelinesFile: CUSTOM.md
+    skillsDirectory: .custom/skills
+    globalGuidelinesFile: ~/.custom/CUSTOM.md
+    globalSkillsDirectory: ~/.custom/skills
+```
 
 ### Conditional Blocks
 agent-adapter supports simple conditional blocks so you can include agent-specific content without duplicating the whole file.
@@ -147,6 +157,9 @@ Each element of `agents` can have the following properties.
 - `guidelinesFile`: Synced file name
 - `skillsDirectory`: Destination for expanded skills (optional)
 - `agentsDirectory`: Destination for expanded agents (optional)
+- `globalGuidelinesFile`: Global guidelines file path, e.g. `~/.claude/CLAUDE.md` (optional)
+- `globalSkillsDirectory`: Global skills directory path, e.g. `~/.claude/skills` (optional)
+- `globalAgentsDirectory`: Global agents directory path, e.g. `~/.claude/agents` (optional)
 
 ## Add agent-adapter outputs to .gitignore
 `generate-gitignore` prints gitignore entries for the agents you specify. Copy and paste the snippet below to append them to your `.gitignore`:
