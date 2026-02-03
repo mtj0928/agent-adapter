@@ -66,12 +66,14 @@ extension AgentAdapterGenerator {
         outputs: AgentAdapterDirectory.AgentOutputs,
         agent: Agent
     ) throws {
-        guard let destinationPath = outputs.guidelinesFilePath else { return }
+        let sourcePath = directory.specFilePath
+        guard fileSystem.fileExists(atPath: sourcePath.path),
+              let destinationPath = outputs.guidelinesFilePath else { return }
         let parentDirectory = destinationPath.deletingLastPathComponent()
         if !fileSystem.fileExists(atPath: parentDirectory.path) {
             try fileSystem.createDirectory(at: parentDirectory, withIntermediateDirectories: true)
         }
-        let specContents = try fileSystem.readString(at: directory.specFilePath, encoding: .utf8)
+        let specContents = try fileSystem.readString(at: sourcePath, encoding: .utf8)
         let filteredSpec = try filterContents(specContents, agent: agent)
         try fileSystem.writeString(filteredSpec, to: destinationPath, atomically: true, encoding: .utf8)
     }
