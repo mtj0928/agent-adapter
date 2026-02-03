@@ -40,10 +40,7 @@ public struct AgentAdapterGenerator {
         to outputs: AgentAdapterDirectory.AgentOutputs,
         agent: Agent
     ) throws {
-        let specContents = try fileSystem.readString(at: directory.specFilePath, encoding: .utf8)
-        let filteredSpec = try filterContents(specContents, agent: agent)
-        try writeSpecOutput(filteredSpec, to: outputs)
-
+        try generateGuidelines(from: directory, outputs: outputs, agent: agent)
         try generateSkills(from: directory, outputs: outputs, agent: agent)
         try generateAgents(from: directory, outputs: outputs, agent: agent)
     }
@@ -64,12 +61,19 @@ extension AgentAdapterGenerator {
         }
     }
 
-    fileprivate func writeSpecOutput(_ contents: String, to outputs: AgentAdapterDirectory.AgentOutputs) throws {
-        let parentDirectory = outputs.guidelinesFilePath.deletingLastPathComponent()
+    fileprivate func generateGuidelines(
+        from directory: AgentAdapterDirectory,
+        outputs: AgentAdapterDirectory.AgentOutputs,
+        agent: Agent
+    ) throws {
+        guard let destinationPath = outputs.guidelinesFilePath else { return }
+        let parentDirectory = destinationPath.deletingLastPathComponent()
         if !fileSystem.fileExists(atPath: parentDirectory.path) {
             try fileSystem.createDirectory(at: parentDirectory, withIntermediateDirectories: true)
         }
-        try fileSystem.writeString(contents, to: outputs.guidelinesFilePath, atomically: true, encoding: .utf8)
+        let specContents = try fileSystem.readString(at: directory.specFilePath, encoding: .utf8)
+        let filteredSpec = try filterContents(specContents, agent: agent)
+        try fileSystem.writeString(filteredSpec, to: destinationPath, atomically: true, encoding: .utf8)
     }
 
     fileprivate func generateSkills(
@@ -80,6 +84,10 @@ extension AgentAdapterGenerator {
         let sourcePath = directory.agentAdapterSkillsPath
         guard fileSystem.fileExists(atPath: sourcePath.path),
               let destinationPath = outputs.skillsDirectoryPath else { return }
+        let parentDirectory = destinationPath.deletingLastPathComponent()
+        if !fileSystem.fileExists(atPath: parentDirectory.path) {
+            try fileSystem.createDirectory(at: parentDirectory, withIntermediateDirectories: true)
+        }
         try copyDirectoryContents(from: sourcePath, to: destinationPath, agent: agent)
     }
 
@@ -91,6 +99,10 @@ extension AgentAdapterGenerator {
         let sourcePath = directory.agentAdapterAgentsPath
         guard fileSystem.fileExists(atPath: sourcePath.path),
               let destinationPath = outputs.agentsDirectoryPath else { return }
+        let parentDirectory = destinationPath.deletingLastPathComponent()
+        if !fileSystem.fileExists(atPath: parentDirectory.path) {
+            try fileSystem.createDirectory(at: parentDirectory, withIntermediateDirectories: true)
+        }
         try copyDirectoryContents(from: sourcePath, to: destinationPath, agent: agent)
     }
 
