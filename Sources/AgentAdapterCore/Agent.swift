@@ -13,15 +13,15 @@ public struct Agent: Hashable, Sendable, Codable {
     public let agentsDirectory: String?
 
     /// Global guidelines file path (e.g. "~/.claude/CLAUDE.md").
-    /// If nil, defaults to `~/.<agent-name>/<guidelinesFile>`.
+    /// If nil, no global guidelines file is generated.
     public let globalGuidelinesFile: String?
 
     /// Global skills directory path (e.g. "~/.claude/skills").
-    /// If nil, defaults to `~/.<agent-name>/skills` when `skillsDirectory` is set.
+    /// If nil, no global skills are generated.
     public let globalSkillsDirectory: String?
 
     /// Global agents directory path (e.g. "~/.claude/agents").
-    /// If nil, defaults to `~/.<agent-name>/agents` when `agentsDirectory` is set.
+    /// If nil, no global agents are generated.
     public let globalAgentsDirectory: String?
 
     public init(
