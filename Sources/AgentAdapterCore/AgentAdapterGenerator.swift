@@ -80,10 +80,6 @@ extension AgentAdapterGenerator {
         let sourcePath = directory.agentAdapterSkillsPath
         guard fileSystem.fileExists(atPath: sourcePath.path),
               let destinationPath = outputs.skillsDirectoryPath else { return }
-        let parentDirectory = destinationPath.deletingLastPathComponent()
-        if !fileSystem.fileExists(atPath: parentDirectory.path) {
-            try fileSystem.createDirectory(at: parentDirectory, withIntermediateDirectories: true)
-        }
         try copyDirectoryContents(from: sourcePath, to: destinationPath, agent: agent)
     }
 
@@ -95,10 +91,6 @@ extension AgentAdapterGenerator {
         let sourcePath = directory.agentAdapterAgentsPath
         guard fileSystem.fileExists(atPath: sourcePath.path),
               let destinationPath = outputs.agentsDirectoryPath else { return }
-        let parentDirectory = destinationPath.deletingLastPathComponent()
-        if !fileSystem.fileExists(atPath: parentDirectory.path) {
-            try fileSystem.createDirectory(at: parentDirectory, withIntermediateDirectories: true)
-        }
         try copyDirectoryContents(from: sourcePath, to: destinationPath, agent: agent)
     }
 
