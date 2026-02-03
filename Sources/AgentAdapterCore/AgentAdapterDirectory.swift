@@ -46,25 +46,51 @@ public struct AgentAdapterDirectory: Sendable {
 extension AgentAdapterDirectory {
     /// Agent-specific output paths derived from an AgentAdapter project root.
     public struct AgentOutputs: Sendable {
-        /// The root URL of the AgentAdapter project.
-        public let rootPath: URL
-
-        /// The agent variant used for output paths.
-        public let agent: Agent
-
         /// The output path for the generated guidelines file (e.g. `AGENTS.md`).
-        public var guidelinesFilePath: URL {
-            rootPath.appendingPathComponent(agent.guidelinesFile)
-        }
+        public let guidelinesFilePath: URL
 
         /// The output path for generated skills, if applicable.
-        public var skillsDirectoryPath: URL? {
-            agent.skillsDirectory.map { rootPath.appendingPathComponent($0) }
-        }
+        public let skillsDirectoryPath: URL?
 
         /// The output path for generated agents, if applicable.
-        public var agentsDirectoryPath: URL? {
-            agent.agentsDirectory.map { rootPath.appendingPathComponent($0) }
+        public let agentsDirectoryPath: URL?
+
+        /// Creates local agent outputs rooted at the project directory.
+        /// - Parameters:
+        ///   - rootPath: The project root directory.
+        ///   - agent: The agent variant to generate.
+        public init(rootPath: URL, agent: Agent) {
+            self.guidelinesFilePath = rootPath.appendingPathComponent(agent.guidelinesFile)
+            self.skillsDirectoryPath = agent.skillsDirectory.map { rootPath.appendingPathComponent($0) }
+            self.agentsDirectoryPath = agent.agentsDirectory.map { rootPath.appendingPathComponent($0) }
+        }
+
+        /// Creates global agent outputs rooted at the home directory.
+        ///
+        /// The global root directory is `~/.<agent-name>/`. For example:
+        /// - Claude: `~/.claude/CLAUDE.md`, `~/.claude/skills/`, `~/.claude/agents/`
+        /// - Codex: `~/.codex/AGENTS.md`, `~/.codex/skills/`
+        /// - Gemini: `~/.gemini/GEMINI.md`
+        ///
+        /// - Parameters:
+        ///   - agent: The agent variant to generate.
+        ///   - homeDirectory: The user's home directory URL.
+        /// - Returns: An ``AgentOutputs`` with global paths.
+        public static func global(agent: Agent, homeDirectory: URL) -> AgentOutputs {
+            let globalRoot = homeDirectory.appendingPathComponent(".\(agent.name)")
+            return AgentOutputs(
+                guidelinesFilePath: globalRoot.appendingPathComponent(agent.guidelinesFile),
+                skillsDirectoryPath: agent.skillsDirectory != nil
+                    ? globalRoot.appendingPathComponent("skills") : nil,
+                agentsDirectoryPath: agent.agentsDirectory != nil
+                    ? globalRoot.appendingPathComponent("agents") : nil
+            )
+        }
+
+        private init(guidelinesFilePath: URL, skillsDirectoryPath: URL?, agentsDirectoryPath: URL?) {
+            self.guidelinesFilePath = guidelinesFilePath
+            self.skillsDirectoryPath = skillsDirectoryPath
+            self.agentsDirectoryPath = agentsDirectoryPath
         }
     }
 }

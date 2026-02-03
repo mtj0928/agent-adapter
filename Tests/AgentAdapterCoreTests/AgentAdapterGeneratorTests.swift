@@ -156,6 +156,130 @@ struct AgentAdapterGeneratorTests {
         ))
     }
 
+    // MARK: - Global Generation
+
+    @Test func generatesClaudeGlobalOutputs() throws {
+        let rootPath = URL(fileURLWithPath: "/project")
+        let homeDirectory = URL(fileURLWithPath: "/home")
+        let fileSystem = InMemoryFileSystem()
+        try fileSystem.createDirectory(at: rootPath, withIntermediateDirectories: true)
+        try fileSystem.createDirectory(at: homeDirectory, withIntermediateDirectories: true)
+        try fileSystem.writeFile(
+            path: rootPath.appendingPathComponent("AGENT_GUIDELINES.md"),
+            contents: """
+            Shared
+            <!-- AGENT_ADAPTER:claude -->
+            Claude Only
+            <!-- AGENT_ADAPTER -->
+            """
+        )
+        try fileSystem.writeFile(
+            path: rootPath.appendingPathComponent(".agent-adapter/skills/test/SKILL.md"),
+            contents: "Skill Content"
+        )
+        try fileSystem.writeFile(
+            path: rootPath.appendingPathComponent(".agent-adapter/agents/reviewer/AGENT.md"),
+            contents: "Agent Content"
+        )
+
+        let generator = AgentAdapterGenerator(fileSystem: fileSystem)
+        try generator.generateGlobal(in: rootPath, agent: .claude, homeDirectory: homeDirectory)
+
+        let claude = try fileSystem.readString(
+            at: URL(fileURLWithPath: "/home/.claude/CLAUDE.md"),
+            encoding: .utf8
+        )
+        #expect(claude == "Shared\nClaude Only")
+
+        let skill = try fileSystem.readString(
+            at: URL(fileURLWithPath: "/home/.claude/skills/test/SKILL.md"),
+            encoding: .utf8
+        )
+        #expect(skill == "Skill Content")
+
+        let agent = try fileSystem.readString(
+            at: URL(fileURLWithPath: "/home/.claude/agents/reviewer/AGENT.md"),
+            encoding: .utf8
+        )
+        #expect(agent == "Agent Content")
+
+        // Should not write to project root
+        #expect(!fileSystem.fileExists(atPath: rootPath.appendingPathComponent("CLAUDE.md").path))
+    }
+
+    @Test func generatesCodexGlobalOutputs() throws {
+        let rootPath = URL(fileURLWithPath: "/project")
+        let homeDirectory = URL(fileURLWithPath: "/home")
+        let fileSystem = InMemoryFileSystem()
+        try fileSystem.createDirectory(at: rootPath, withIntermediateDirectories: true)
+        try fileSystem.createDirectory(at: homeDirectory, withIntermediateDirectories: true)
+        try fileSystem.writeFile(
+            path: rootPath.appendingPathComponent("AGENT_GUIDELINES.md"),
+            contents: """
+            Shared
+            <!-- AGENT_ADAPTER:codex -->
+            Codex Only
+            <!-- AGENT_ADAPTER -->
+            """
+        )
+        try fileSystem.writeFile(
+            path: rootPath.appendingPathComponent(".agent-adapter/skills/test/SKILL.md"),
+            contents: "Skill Content"
+        )
+
+        let generator = AgentAdapterGenerator(fileSystem: fileSystem)
+        try generator.generateGlobal(in: rootPath, agent: .codex, homeDirectory: homeDirectory)
+
+        let codex = try fileSystem.readString(
+            at: URL(fileURLWithPath: "/home/.codex/AGENTS.md"),
+            encoding: .utf8
+        )
+        #expect(codex == "Shared\nCodex Only")
+
+        let skill = try fileSystem.readString(
+            at: URL(fileURLWithPath: "/home/.codex/skills/test/SKILL.md"),
+            encoding: .utf8
+        )
+        #expect(skill == "Skill Content")
+
+        // Codex has no agents directory
+        #expect(!fileSystem.fileExists(atPath: "/home/.codex/agents"))
+    }
+
+    @Test func generatesGeminiGlobalOutputs() throws {
+        let rootPath = URL(fileURLWithPath: "/project")
+        let homeDirectory = URL(fileURLWithPath: "/home")
+        let fileSystem = InMemoryFileSystem()
+        try fileSystem.createDirectory(at: rootPath, withIntermediateDirectories: true)
+        try fileSystem.createDirectory(at: homeDirectory, withIntermediateDirectories: true)
+        try fileSystem.writeFile(
+            path: rootPath.appendingPathComponent("AGENT_GUIDELINES.md"),
+            contents: """
+            Shared
+            <!-- AGENT_ADAPTER:gemini -->
+            Gemini Only
+            <!-- AGENT_ADAPTER -->
+            """
+        )
+        try fileSystem.writeFile(
+            path: rootPath.appendingPathComponent(".agent-adapter/skills/test/SKILL.md"),
+            contents: "Skill Content"
+        )
+
+        let generator = AgentAdapterGenerator(fileSystem: fileSystem)
+        try generator.generateGlobal(in: rootPath, agent: .gemini, homeDirectory: homeDirectory)
+
+        let gemini = try fileSystem.readString(
+            at: URL(fileURLWithPath: "/home/.gemini/GEMINI.md"),
+            encoding: .utf8
+        )
+        #expect(gemini == "Shared\nGemini Only")
+
+        // Gemini has no skills or agents directories
+        #expect(!fileSystem.fileExists(atPath: "/home/.gemini/skills"))
+        #expect(!fileSystem.fileExists(atPath: "/home/.gemini/agents"))
+    }
+
     @Test func throwsOnNestedAgentAdapterBlocks() {
         let rootPath = URL(fileURLWithPath: "/root")
         let fileSystem = InMemoryFileSystem()

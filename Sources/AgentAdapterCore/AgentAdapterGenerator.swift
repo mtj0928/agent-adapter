@@ -17,6 +17,29 @@ public struct AgentAdapterGenerator {
     public func generate(in rootPath: URL, agent: Agent) throws {
         let directory = AgentAdapterDirectory(rootPath: rootPath)
         let outputs = directory.outputs(for: agent)
+        try performGeneration(from: directory, to: outputs, agent: agent)
+    }
+
+    /// Generates agent-specific outputs into global (home directory) paths.
+    ///
+    /// Sources are read from the project root, but outputs are written to
+    /// the user's home directory under `~/.<agent-name>/`.
+    ///
+    /// - Parameters:
+    ///   - rootPath: The project root containing `AGENT_GUIDELINES.md`.
+    ///   - agent: The agent variant to generate.
+    ///   - homeDirectory: The user's home directory URL.
+    public func generateGlobal(in rootPath: URL, agent: Agent, homeDirectory: URL) throws {
+        let directory = AgentAdapterDirectory(rootPath: rootPath)
+        let outputs = AgentAdapterDirectory.AgentOutputs.global(agent: agent, homeDirectory: homeDirectory)
+        try performGeneration(from: directory, to: outputs, agent: agent)
+    }
+
+    private func performGeneration(
+        from directory: AgentAdapterDirectory,
+        to outputs: AgentAdapterDirectory.AgentOutputs,
+        agent: Agent
+    ) throws {
         let specContents = try fileSystem.readString(at: directory.specFilePath, encoding: .utf8)
         let filteredSpec = try filterContents(specContents, agent: agent)
         try writeSpecOutput(filteredSpec, to: outputs)
@@ -42,6 +65,10 @@ extension AgentAdapterGenerator {
     }
 
     fileprivate func writeSpecOutput(_ contents: String, to outputs: AgentAdapterDirectory.AgentOutputs) throws {
+        let parentDirectory = outputs.guidelinesFilePath.deletingLastPathComponent()
+        if !fileSystem.fileExists(atPath: parentDirectory.path) {
+            try fileSystem.createDirectory(at: parentDirectory, withIntermediateDirectories: true)
+        }
         try fileSystem.writeString(contents, to: outputs.guidelinesFilePath, atomically: true, encoding: .utf8)
     }
 
