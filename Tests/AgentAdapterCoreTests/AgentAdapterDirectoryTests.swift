@@ -20,7 +20,7 @@ struct AgentAdapterDirectoryTests {
         let codexOutputs = directory.outputs(for: .codex)
         #expect(codexOutputs.guidelinesFilePath == rootPath.appendingPathComponent("AGENTS.md"))
         #expect(codexOutputs.skillsDirectoryPath == rootPath.appendingPathComponent(".codex/skills"))
-        #expect(codexOutputs.agentsDirectoryPath == nil)
+        #expect(codexOutputs.agentsDirectoryPath == rootPath.appendingPathComponent(".codex/agents"))
 
         let claudeOutputs = directory.outputs(for: .claude)
         #expect(claudeOutputs.guidelinesFilePath == rootPath.appendingPathComponent("CLAUDE.md"))

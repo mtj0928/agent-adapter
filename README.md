@@ -4,7 +4,7 @@ Write once in `AGENT_GUIDELINES.md`, then generate not only the agent-specific g
 
 ## How It Works
 - **Copy from a single source**: `AGENT_GUIDELINES.md` is the canonical document. agent-adapter reads it and generates agent-specific files such as `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md`.
-- **Skills and agents are generated too**: Place reusable skills and (for Claude) agents in `.agent-adapter/`. They are expanded into `.codex/` and `.claude/` as needed, preserving directory structure so the full skill/agent sets stay aligned.
+- **Skills and agents are generated too**: Place reusable skills and agents in `.agent-adapter/`. They are expanded into `.codex/` and `.claude/` as needed, preserving directory structure so the full skill/agent sets stay aligned.
 - **Use the CLI**: Run the generator for each target agent, including any custom agents from `agent-adapter.yml`.
 
 ## Generate Configurations
@@ -12,7 +12,7 @@ agent-adapter can generate configurations for specific agents from `AGENT_GUIDEL
 
 ### Usages
 ```bash
-# Generate `AGENTS.md` and `.codex/skills` for Codex
+# Generate `AGENTS.md`, `.codex/skills`, and `.codex/agents` for Codex
 agent-adapter generate-config codex
 
 # Generate `CLAUDE.md` and `.claude/skills` and `.claude/agents` from Claude Code.
@@ -56,6 +56,28 @@ This is a basic directory structure.
             └── AGENT.md
 ```
 
+### Agent definitions
+
+Define each agent in `.agent-adapter/agents/<AgentName>/AGENT.md`. For Codex, the YAML front matter becomes TOML properties, and the Markdown body becomes `developer_instructions`. The front matter must contain nonblank `name` and `description` strings. Agent names must be unique after trimming surrounding whitespace. `developer_instructions` is reserved for the body. TOML filenames use the directory name; Codex identifies agents by the `name` property.
+
+Conditional blocks are applied before conversion, including inside front matter. Put agent-specific properties in their respective blocks, because each product supports different properties:
+
+```markdown
+---
+name: reviewer
+description: Reviews changes for correctness.
+<!-- AGENT_ADAPTER:codex -->
+model: gpt-6.1-sol
+<!-- AGENT_ADAPTER -->
+<!-- AGENT_ADAPTER:claude -->
+tools: Read, Grep, Glob
+<!-- AGENT_ADAPTER -->
+---
+Review changes and report actionable findings.
+```
+
+Codex output is written to `.codex/agents/reviewer.toml` (or `~/.codex/agents/reviewer.toml` with `--global`). Claude output retains the filtered Markdown and existing directory layout. YAML strings, booleans, numbers, arrays, and mappings are supported; unsupported values such as null produce an error. Other files in an agent directory are copied for Claude but are not included in the Codex output.
+
 ### Generated Outputs (by agent)
 See exactly what files and directories are generated for each agent and which source they come from.
 
@@ -66,6 +88,7 @@ See exactly what files and directories are generated for each agent and which so
 | --- | --- |
 | `AGENTS.md` | `AGENT_GUIDELINES.md` |
 | `.codex/skills/` | `.agent-adapter/skills/` |
+| `.codex/agents/<AgentName>.toml` | `.agent-adapter/agents/<AgentName>/AGENT.md` |
 
 </details>
 
@@ -95,7 +118,7 @@ By default, `generate-config` writes files into the current project directory. P
 | Agent | Global output |
 | --- | --- |
 | Claude Code | `~/.claude/CLAUDE.md`, `~/.claude/skills/`, `~/.claude/agents/` |
-| Codex | `~/.codex/AGENTS.md`, `~/.codex/skills/` |
+| Codex | `~/.codex/AGENTS.md`, `~/.codex/skills/`, `~/.codex/agents/` |
 | Gemini CLI | `~/.gemini/GEMINI.md` |
 | Custom | Uses `globalGuidelinesFile`, `globalSkillsDirectory`, `globalAgentsDirectory` from config |
 

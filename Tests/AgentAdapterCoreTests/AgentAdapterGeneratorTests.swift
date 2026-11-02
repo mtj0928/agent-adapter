@@ -63,6 +63,86 @@ struct AgentAdapterGeneratorTests {
         ))
     }
 
+    @Test func generatesCodexAgentFromConditionalMarkdown() throws {
+        let rootPath = URL(fileURLWithPath: "/project")
+        let fileSystem = InMemoryFileSystem()
+        try fileSystem.writeFile(path: rootPath.appendingPathComponent(".agent-adapter/agents/reviewer/AGENT.md"), contents: """
+        ---
+        name: reviewer
+        description: "Reviews code"
+        <!-- AGENT_ADAPTER:codex -->
+        model: codex-model
+        features:
+          shell_tool: false
+        <!-- AGENT_ADAPTER -->
+        <!-- AGENT_ADAPTER:claude -->
+        tools: Read
+        <!-- AGENT_ADAPTER -->
+        ---
+        Shared instructions.
+        <!-- AGENT_ADAPTER:codex -->
+        Codex instructions.
+        <!-- AGENT_ADAPTER -->
+        """)
+        let generator = AgentAdapterGenerator(fileSystem: fileSystem)
+        try generator.generate(in: rootPath, agent: .codex)
+        try generator.generateGlobal(in: rootPath, agent: .codex, homeDirectory: URL(fileURLWithPath: "/home"))
+        let local = try fileSystem.readString(at: rootPath.appendingPathComponent(".codex/agents/reviewer.toml"), encoding: .utf8)
+        let global = try fileSystem.readString(at: URL(fileURLWithPath: "/home/.codex/agents/reviewer.toml"), encoding: .utf8)
+        #expect(local == global)
+        #expect(local.contains("\"name\" = \"reviewer\""))
+        #expect(local.contains("\"features\" = { \"shell_tool\" = false }"))
+        #expect(local.contains("developer_instructions = \"Shared instructions.\\nCodex instructions.\""))
+        #expect(!local.contains("tools"))
+        try generator.generate(in: rootPath, agent: .claude)
+        let claude = try fileSystem.readString(at: rootPath.appendingPathComponent(".claude/agents/reviewer/AGENT.md"), encoding: .utf8)
+        #expect(claude.contains("tools: Read"))
+        #expect(!claude.contains("codex-model"))
+    }
+
+    @Test func rejectsInvalidCodexAgentFrontMatter() throws {
+        let rootPath = URL(fileURLWithPath: "/project")
+        let fileSystem = InMemoryFileSystem()
+        try fileSystem.writeFile(path: rootPath.appendingPathComponent(".agent-adapter/agents/reviewer/AGENT.md"), contents: "Missing front matter")
+        #expect(throws: CodexAgentFormat.ConversionError.self) {
+            try AgentAdapterGenerator(fileSystem: fileSystem).generate(in: rootPath, agent: .codex)
+        }
+    }
+
+    @Test(arguments: ["name: '   '\ndescription: Valid", "name: valid\ndescription: '   '"])
+    func rejectsBlankCodexAgentMetadata(_ metadata: String) throws {
+        let rootPath = URL(fileURLWithPath: "/project")
+        let fileSystem = InMemoryFileSystem()
+        let source = rootPath.appendingPathComponent(".agent-adapter/agents/reviewer/AGENT.md")
+        try fileSystem.writeFile(path: source, contents: "---\n\(metadata)\n---\nInstructions")
+        #expect(throws: CodexAgentFormat.ConversionError.self) {
+            try AgentAdapterGenerator(fileSystem: fileSystem).generate(in: rootPath, agent: .codex)
+        }
+    }
+
+    @Test func rejectsDuplicateCodexAgentNamesBeforeWritingAgents() throws {
+        let rootPath = URL(fileURLWithPath: "/project")
+        let fileSystem = InMemoryFileSystem()
+        let first = rootPath.appendingPathComponent(".agent-adapter/agents/first/AGENT.md")
+        let second = rootPath.appendingPathComponent(".agent-adapter/agents/second/AGENT.md")
+        try fileSystem.writeFile(path: first, contents: "---\nname: reviewer\ndescription: First\n---\nInstructions")
+        try fileSystem.writeFile(path: second, contents: "---\nname: ' reviewer '\ndescription: Second\n---\nInstructions")
+        do {
+            try AgentAdapterGenerator(fileSystem: fileSystem).generate(in: rootPath, agent: .codex)
+            Issue.record("Expected duplicate names to be rejected")
+        } catch let error as CodexAgentFormat.ConversionError {
+            #expect(error.errorDescription?.contains(first.path) == true)
+            #expect(error.errorDescription?.contains(second.path) == true)
+        }
+        #expect(!fileSystem.fileExists(atPath: rootPath.appendingPathComponent(".codex/agents/first.toml").path))
+    }
+
+    @Test func acceptsCodexAgentNamesWithUnicodeAndPunctuation() throws {
+        let source = URL(fileURLWithPath: "/project/AGENT.md")
+        let result = try CodexAgentFormat.convert("---\nname: '日本語 reviewer! '\ndescription: Review\n---\nInstructions", source: source)
+        #expect(result.name == "日本語 reviewer!")
+    }
+
     @Test func generatesGeminiOutputs() throws {
         let rootPath = URL(fileURLWithPath: "/root")
         let fileSystem = InMemoryFileSystem()
@@ -242,7 +322,7 @@ struct AgentAdapterGeneratorTests {
         )
         #expect(skill == "Skill Content")
 
-        // Codex has no agents directory
+        // No agents are generated when the source directory is absent.
         #expect(!fileSystem.fileExists(atPath: "/home/.codex/agents"))
     }
 

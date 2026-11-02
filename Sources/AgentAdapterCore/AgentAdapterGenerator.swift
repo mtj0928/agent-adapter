@@ -83,6 +83,30 @@ extension AgentAdapterGenerator {
         try copyDirectoryContents(from: sourcePath, to: destinationPath, agent: agent)
     }
 
+    fileprivate func generateCodexAgents(from sourcePath: URL, to destinationPath: URL, agent: Agent) throws {
+        var names: [String: URL] = [:]
+        var outputs: [(destination: URL, contents: String)] = []
+        for item in try fileSystem.contentsOfDirectory(at: sourcePath).sorted(by: { $0.path < $1.path }) where try fileSystem.isDirectory(at: item) {
+            let source = item.appendingPathComponent("AGENT.md")
+            if !fileSystem.fileExists(atPath: source.path) { continue }
+            let contents = try fileSystem.readString(at: source, encoding: .utf8)
+            let filtered = try filterContents(contents, agent: agent)
+            let output = try CodexAgentFormat.convert(filtered, source: source)
+            if let previous = names[output.name] {
+                throw CodexAgentFormat.ConversionError(source: source, message: "duplicate agent name '\(output.name)' also defined in \(previous.path)")
+            }
+            names[output.name] = source
+            let destination = destinationPath.appendingPathComponent(item.lastPathComponent + ".toml")
+            outputs.append((destination, output.contents))
+        }
+        if !outputs.isEmpty {
+            try fileSystem.createDirectory(at: destinationPath, withIntermediateDirectories: true)
+        }
+        for output in outputs {
+            try fileSystem.writeString(output.contents, to: output.destination, atomically: true, encoding: .utf8)
+        }
+    }
+
     fileprivate func generateAgents(
         from directory: AgentAdapterDirectory,
         outputs: AgentAdapterDirectory.AgentOutputs,
@@ -91,7 +115,11 @@ extension AgentAdapterGenerator {
         let sourcePath = directory.agentAdapterAgentsPath
         guard fileSystem.fileExists(atPath: sourcePath.path),
               let destinationPath = outputs.agentsDirectoryPath else { return }
-        try copyDirectoryContents(from: sourcePath, to: destinationPath, agent: agent)
+        if agent.name == "codex" {
+            try generateCodexAgents(from: sourcePath, to: destinationPath, agent: agent)
+        } else {
+            try copyDirectoryContents(from: sourcePath, to: destinationPath, agent: agent)
+        }
     }
 
     fileprivate func copyDirectoryContents(from sourcePath: URL, to destinationPath: URL, agent: Agent) throws {

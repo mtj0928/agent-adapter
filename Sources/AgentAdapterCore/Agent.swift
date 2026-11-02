@@ -49,10 +49,10 @@ extension Agent {
         name: "codex",
         guidelinesFile: "AGENTS.md",
         skillsDirectory: ".codex/skills",
-        agentsDirectory: nil,
+        agentsDirectory: ".codex/agents",
         globalGuidelinesFile: "~/.codex/AGENTS.md",
         globalSkillsDirectory: "~/.codex/skills",
-        globalAgentsDirectory: nil
+        globalAgentsDirectory: "~/.codex/agents"
     )
 
     /// Claude Code agent output (`CLAUDE.md` and `.claude/`).
