@@ -20,6 +20,9 @@ struct AgentAdapter: AsyncParsableCommand {
         @Flag(name: .long, help: "Generate config into the global (home directory) location instead of the project root.")
         var global: Bool = false
 
+        @Option(name: .long, help: "Source identifier for tracking generated skills (defaults to the project directory path).")
+        var source: String?
+
         mutating func run() async throws {
             let fileSystem = FileManager.default
             let generator = AgentAdapterGenerator()
@@ -51,11 +54,11 @@ struct AgentAdapter: AsyncParsableCommand {
             if global {
                 let homeDirectory = fileSystem.homeDirectoryForCurrentUser
                 for agent in agents {
-                    try generator.generateGlobal(in: rootPath, agent: agent, homeDirectory: homeDirectory)
+                    try generator.generateGlobal(in: rootPath, agent: agent, homeDirectory: homeDirectory, source: source)
                 }
             } else {
                 for agent in agents {
-                    try generator.generate(in: rootPath, agent: agent)
+                    try generator.generate(in: rootPath, agent: agent, source: source)
                 }
             }
         }

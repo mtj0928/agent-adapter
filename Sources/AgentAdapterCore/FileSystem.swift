@@ -1,7 +1,12 @@
+import Darwin
 import Foundation
 
 /// Abstraction over filesystem operations used by AgentAdapter.
 public protocol FileSystem {
+    /// Runs an operation while holding an exclusive lock on the directory.
+    /// Implementations must serialize operations across processes sharing this directory.
+    func withExclusiveAccess<T>(to directory: URL, perform: () throws -> T) throws -> T
+
     /// Returns true if a filesystem entry exists at the provided path.
     func fileExists(atPath: String) -> Bool
 
@@ -31,6 +36,18 @@ public protocol FileSystem {
 }
 
 extension FileManager: FileSystem {
+    public func withExclusiveAccess<T>(to directory: URL, perform: () throws -> T) throws -> T {
+        try createDirectory(at: directory, withIntermediateDirectories: true)
+        let descriptor = open(directory.path, O_RDONLY)
+        guard descriptor != -1 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+        defer { close(descriptor) }
+        while flock(descriptor, LOCK_EX) == -1 {
+            if errno != EINTR { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+        }
+        defer { flock(descriptor, LOCK_UN) }
+        return try perform()
+    }
+
     public func createDirectory(at url: URL, withIntermediateDirectories: Bool) throws {
         try createDirectory(at: url, withIntermediateDirectories: withIntermediateDirectories, attributes: nil)
     }

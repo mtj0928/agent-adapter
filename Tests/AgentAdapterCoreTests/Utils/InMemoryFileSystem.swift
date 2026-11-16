@@ -9,6 +9,11 @@ final class InMemoryFileSystem: FileSystem {
 
     private var nodes: [String: Node] = ["/": .directory([])]
 
+    func withExclusiveAccess<T>(to directory: URL, perform: () throws -> T) throws -> T {
+        try createDirectory(at: directory, withIntermediateDirectories: true)
+        return try perform()
+    }
+
     func fileExists(atPath: String) -> Bool {
         nodes[normalize(atPath)] != nil
     }

@@ -1,3 +1,4 @@
+import Dispatch
 import Foundation
 import Testing
 @testable import AgentAdapterCore
@@ -40,6 +41,42 @@ struct FileManagerFileSystemTests {
         try fileSystem.removeItem(at: original)
         #expect(!fileSystem.fileExists(atPath: original.path))
         #expect(fileSystem.fileExists(atPath: copy.path))
+    }
+
+    @Test(.temporaryDirectory) func serializesAccessToTheSameDirectory() throws {
+        let directory = try temporaryRootPath().appendingPathComponent("skills")
+        let firstEntered = DispatchSemaphore(value: 0)
+        let releaseFirst = DispatchSemaphore(value: 0)
+        let secondAttempted = DispatchSemaphore(value: 0)
+        let secondEntered = DispatchSemaphore(value: 0)
+        let completed = DispatchSemaphore(value: 0)
+        let failed = DispatchSemaphore(value: 0)
+
+        DispatchQueue.global().async {
+            defer { completed.signal() }
+            do {
+                try FileManager.default.withExclusiveAccess(to: directory) {
+                    firstEntered.signal()
+                    releaseFirst.wait()
+                }
+            } catch { failed.signal() }
+        }
+        defer { releaseFirst.signal() }
+        try #require(firstEntered.wait(timeout: .now() + 5) == .success)
+        DispatchQueue.global().async {
+            defer { completed.signal() }
+            secondAttempted.signal()
+            do {
+                try FileManager.default.withExclusiveAccess(to: directory) { _ = secondEntered.signal() }
+            } catch { failed.signal() }
+        }
+        try #require(secondAttempted.wait(timeout: .now() + 5) == .success)
+        #expect(secondEntered.wait(timeout: .now() + .milliseconds(200)) == .timedOut)
+        releaseFirst.signal()
+        #expect(secondEntered.wait(timeout: .now() + 5) == .success)
+        #expect(completed.wait(timeout: .now() + 5) == .success)
+        #expect(completed.wait(timeout: .now() + 5) == .success)
+        #expect(failed.wait(timeout: .now()) == .timedOut)
     }
 
     @Test(.temporaryDirectory) func throwsOnMissingPaths() throws {
