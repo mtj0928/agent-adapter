@@ -3,6 +3,129 @@ import Testing
 @testable import AgentAdapterCore
 
 struct AgentAdapterGeneratorTests {
+    @Test(.temporaryDirectory) func preservesSkillAfterCaseOnlyRename() throws {
+        let root = try temporaryRootPath()
+        let fileSystem: FileSystem = FileManager.default
+        let source = root.appendingPathComponent(".agent-adapter/skills")
+        let destination = root.appendingPathComponent(".codex/skills")
+        let generator = AgentAdapterGenerator(fileSystem: fileSystem)
+        try fileSystem.writeFile(path: source.appendingPathComponent("example/SKILL.md"), contents: "Skill")
+        try generator.generate(in: root, agent: .codex)
+
+        try FileManager.default.moveItem(at: source.appendingPathComponent("example"), to: source.appendingPathComponent("Example"))
+        try generator.generate(in: root, agent: .codex)
+
+        let skill = destination.appendingPathComponent("Example/SKILL.md")
+        #expect(try fileSystem.readString(at: skill, encoding: .utf8) == "Skill")
+        #expect(try fileSystem.contentsOfDirectory(at: destination).map(\.lastPathComponent).sorted() == [".agent-actions.json", "Example"])
+        try generator.generate(in: root, agent: .codex)
+        #expect(fileSystem.fileExists(atPath: skill.path))
+    }
+
+    @Test(arguments: [false, true]) func tracksSkillsWhenGenerationFails(hasPreviousManifest: Bool) throws {
+        let root = URL(fileURLWithPath: "/project")
+        let source = root.appendingPathComponent(".agent-adapter/skills")
+        let destination = root.appendingPathComponent(".codex/skills")
+        let fileSystem = InMemoryFileSystem()
+        let generator = AgentAdapterGenerator(fileSystem: fileSystem)
+        if hasPreviousManifest {
+            try fileSystem.createDirectory(at: source, withIntermediateDirectories: true)
+            try generator.generate(in: root, agent: .codex)
+        }
+        try fileSystem.writeFile(path: source.appendingPathComponent("first/SKILL.md"), contents: "valid")
+        try fileSystem.writeFile(path: source.appendingPathComponent("second/SKILL.md"), contents: """
+        <!-- AGENT_ADAPTER:codex -->
+        <!-- AGENT_ADAPTER:claude -->
+        """)
+        try fileSystem.writeFile(path: source.appendingPathComponent("third/SKILL.md"), contents: "not reached")
+        try fileSystem.writeFile(path: destination.appendingPathComponent("third/manual.txt"), contents: "manual")
+
+        #expect(throws: AgentAdapterGenerator.AgentAdapterGeneratorError.self) {
+            try generator.generate(in: root, agent: .codex)
+        }
+        #expect(fileSystem.fileExists(atPath: destination.appendingPathComponent("first/SKILL.md").path))
+        try fileSystem.removeItem(at: source)
+        try generator.generate(in: root, agent: .codex)
+        #expect(!fileSystem.fileExists(atPath: destination.appendingPathComponent("first").path))
+        #expect(!fileSystem.fileExists(atPath: destination.appendingPathComponent("second").path))
+        #expect(fileSystem.fileExists(atPath: destination.appendingPathComponent("third/manual.txt").path))
+    }
+
+    @Test(arguments: [false, true]) func removesPreviouslyGeneratedSkills(global: Bool) throws {
+        let root = URL(fileURLWithPath: "/project")
+        let home = URL(fileURLWithPath: "/home")
+        let source = root.appendingPathComponent(".agent-adapter/skills")
+        let destination = (global ? home : root).appendingPathComponent(".codex/skills")
+        let fileSystem = InMemoryFileSystem()
+        let generator = AgentAdapterGenerator(fileSystem: fileSystem)
+        try fileSystem.writeFile(path: source.appendingPathComponent("old/SKILL.md"), contents: "old")
+        try fileSystem.writeFile(path: source.appendingPathComponent("keep/SKILL.md"), contents: "keep")
+        try fileSystem.writeFile(path: destination.appendingPathComponent("manual/SKILL.md"), contents: "manual")
+
+        func generate() throws {
+            if global {
+                try generator.generateGlobal(in: root, agent: .codex, homeDirectory: home)
+            } else {
+                try generator.generate(in: root, agent: .codex)
+            }
+        }
+
+        try generate()
+        try fileSystem.removeItem(at: source.appendingPathComponent("old"))
+        try fileSystem.writeFile(path: source.appendingPathComponent("renamed/SKILL.md"), contents: "renamed")
+        try generate()
+
+        #expect(!fileSystem.fileExists(atPath: destination.appendingPathComponent("old").path))
+        #expect(fileSystem.fileExists(atPath: destination.appendingPathComponent("keep/SKILL.md").path))
+        #expect(fileSystem.fileExists(atPath: destination.appendingPathComponent("renamed/SKILL.md").path))
+        #expect(fileSystem.fileExists(atPath: destination.appendingPathComponent("manual/SKILL.md").path))
+        let manifest = try fileSystem.readString(at: destination.appendingPathComponent(".agent-actions.json"), encoding: .utf8)
+        #expect(manifest.contains("\"keep\""))
+        #expect(manifest.contains("\"renamed\""))
+        #expect(!manifest.contains("\"old\""))
+
+        try fileSystem.removeItem(at: source)
+        try fileSystem.removeItem(at: destination.appendingPathComponent("keep"))
+        try generate()
+        #expect(!fileSystem.fileExists(atPath: destination.appendingPathComponent("renamed").path))
+        #expect(fileSystem.fileExists(atPath: destination.appendingPathComponent("manual/SKILL.md").path))
+    }
+
+    @Test(arguments: ["{ invalid", "{\"items\":[\"../outside\"]}", "{\"items\":[\".agent-actions.json\"]}", "{\"items\":[\".AGENT-ACTIONS.JSON\"]}"])
+    func rejectsInvalidSkillManifests(contents: String) throws {
+        let root = URL(fileURLWithPath: "/project")
+        let destination = root.appendingPathComponent(".codex/skills")
+        let fileSystem = InMemoryFileSystem()
+        try fileSystem.writeFile(path: destination.appendingPathComponent(".agent-actions.json"), contents: contents)
+        try fileSystem.writeFile(path: root.appendingPathComponent(".codex/outside"), contents: "safe")
+
+        #expect(throws: (any Error).self) {
+            try AgentAdapterGenerator(fileSystem: fileSystem).generate(in: root, agent: .codex)
+        }
+        #expect(fileSystem.fileExists(atPath: root.appendingPathComponent(".codex/outside").path))
+        #expect(try fileSystem.readString(at: destination.appendingPathComponent(".agent-actions.json"), encoding: .utf8) == contents)
+    }
+
+    @Test(arguments: [".agent-actions.json", ".AGENT-ACTIONS.JSON"])
+    func rejectsSkillNamesConflictingWithManifest(name: String) throws {
+        let root = URL(fileURLWithPath: "/project")
+        let source = root.appendingPathComponent(".agent-adapter/skills")
+        let destination = root.appendingPathComponent(".codex/skills")
+        let fileSystem = InMemoryFileSystem()
+        let generator = AgentAdapterGenerator(fileSystem: fileSystem)
+        try fileSystem.writeFile(path: source.appendingPathComponent("keep/SKILL.md"), contents: "keep")
+        try generator.generate(in: root, agent: .codex)
+        let manifestPath = destination.appendingPathComponent(".agent-actions.json")
+        let manifest = try fileSystem.readString(at: manifestPath, encoding: .utf8)
+        try fileSystem.writeFile(path: source.appendingPathComponent(name), contents: "not JSON")
+
+        #expect(throws: (any Error).self) {
+            try generator.generate(in: root, agent: .codex)
+        }
+        #expect(try fileSystem.readString(at: manifestPath, encoding: .utf8) == manifest)
+        #expect(fileSystem.fileExists(atPath: destination.appendingPathComponent("keep/SKILL.md").path))
+    }
+
     @Test func generatesCodexOutputs() throws {
         let rootPath = URL(fileURLWithPath: "/root")
         let fileSystem = InMemoryFileSystem()

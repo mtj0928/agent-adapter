@@ -11,6 +11,8 @@ public struct AgentAdapterGenerator {
     }
 
     /// Generates agent-specific outputs in the given project root.
+    /// Previously generated skills absent from the source are removed.
+    /// Skill output is tracked before it is written, including during failed runs.
     /// - Parameters:
     ///   - rootPath: The project root containing `AGENT_GUIDELINES.md`.
     ///   - agent: The agent variant to generate.
@@ -24,6 +26,8 @@ public struct AgentAdapterGenerator {
     ///
     /// Sources are read from the project root, but outputs are written to
     /// the user's home directory under `~/.<agent-name>/`.
+    /// Previously generated skills absent from the source are removed.
+    /// Skill output is tracked before it is written, including during failed runs.
     ///
     /// - Parameters:
     ///   - rootPath: The project root containing `AGENT_GUIDELINES.md`.
@@ -78,9 +82,37 @@ extension AgentAdapterGenerator {
         agent: Agent
     ) throws {
         let sourcePath = directory.agentAdapterSkillsPath
-        guard fileSystem.fileExists(atPath: sourcePath.path),
-              let destinationPath = outputs.skillsDirectoryPath else { return }
-        try copyDirectoryContents(from: sourcePath, to: destinationPath, agent: agent)
+        guard let destinationPath = outputs.skillsDirectoryPath else { return }
+        let manifestPath = destinationPath.appendingPathComponent(SkillManifest.fileName)
+        let sourceExists = fileSystem.fileExists(atPath: sourcePath.path)
+        if !sourceExists && !fileSystem.fileExists(atPath: manifestPath.path) { return }
+
+        let previous = try SkillManifest.read(from: manifestPath, fileSystem: fileSystem)
+        let items = sourceExists ? try fileSystem.contentsOfDirectory(at: sourcePath).sorted(by: { $0.path < $1.path }) : []
+        let current = try SkillManifest(items: items.map(\.lastPathComponent))
+
+        try fileSystem.createDirectory(at: destinationPath, withIntermediateDirectories: true)
+        for name in Set(previous.items).subtracting(current.items).sorted() {
+            let stalePath = destinationPath.appendingPathComponent(name)
+            if fileSystem.fileExists(atPath: stalePath.path) {
+                try fileSystem.removeItem(at: stalePath)
+            }
+        }
+        var tracked = Set(previous.items).intersection(current.items)
+        try SkillManifest(items: Array(tracked)).write(to: manifestPath, fileSystem: fileSystem)
+        for item in items {
+            let name = item.lastPathComponent
+            let isDirectory = try fileSystem.isDirectory(at: item)
+            if tracked.insert(name).inserted {
+                try SkillManifest(items: Array(tracked)).write(to: manifestPath, fileSystem: fileSystem)
+            }
+            let destinationItem = destinationPath.appendingPathComponent(name)
+            if isDirectory {
+                try copyDirectoryContents(from: item, to: destinationItem, agent: agent)
+            } else {
+                try writeFilteredFile(from: item, to: destinationItem, agent: agent)
+            }
+        }
     }
 
     fileprivate func generateCodexAgents(from sourcePath: URL, to destinationPath: URL, agent: Agent) throws {
@@ -198,5 +230,36 @@ extension AgentAdapterGenerator {
         }
 
         return output.joined(separator: "\n")
+    }
+}
+
+private struct SkillManifest: Codable {
+    static let fileName = ".agent-actions.json"
+    let items: [String]
+
+    init(items: [String]) throws {
+        guard items.allSatisfy({ !$0.isEmpty && $0 != "." && $0 != ".." && $0.caseInsensitiveCompare(Self.fileName) != .orderedSame && !$0.contains("/") }) else {
+            throw ManifestError.invalidItem
+        }
+        self.items = items.sorted()
+    }
+
+    static func read(from path: URL, fileSystem: FileSystem) throws -> Self {
+        if !fileSystem.fileExists(atPath: path.path) { return try Self(items: []) }
+        let decoded = try JSONDecoder().decode(Self.self, from: fileSystem.readData(at: path))
+        return try Self(items: decoded.items)
+    }
+
+    func write(to path: URL, fileSystem: FileSystem) throws {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        let data = try encoder.encode(self)
+        guard let contents = String(data: data, encoding: .utf8) else { throw ManifestError.invalidEncoding }
+        try fileSystem.writeString(contents + "\n", to: path, atomically: true, encoding: .utf8)
+    }
+
+    enum ManifestError: Error {
+        case invalidItem
+        case invalidEncoding
     }
 }
